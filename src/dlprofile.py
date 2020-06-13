@@ -29,6 +29,8 @@ import json
 Pip Packages
 """
 import pandas as pd
+import h5py
+import tensorflow as tf
 
 """
 Local Includes
@@ -64,7 +66,7 @@ def _exec_cmd(command):
 def _exec_cmds(commands):
     """
     Executes a command on Shell and returns stdout and stderr from the command.
-    :param command: the string of the command to be executed
+    :param commands: the string of the command to be executed
     :return: stdout: standard output of command , stderr  standard error of command
     """
     out = [None] * len(commands)
@@ -83,7 +85,7 @@ def _exec_cmds(commands):
                                       stderr=subprocess.STDOUT)
     for i in range(len(commands)):
         stdout, stderr = out[i].communicate()
-    #stdout, stderr = out[len(commands) - 1].communicate()
+    # stdout, stderr = out[len(commands) - 1].communicate()
     lines_b = stdout.splitlines()
     lines = []
     for line in lines_b:
@@ -104,14 +106,13 @@ def progress(count, total, status=''):
     os.sys.stdout.flush()
 
 
-
 class DLProfile(object):
     """
     DLProfile is a Deep Learning profiling tool.
 
     Methods
     -------
-    load(darshan_file=None, preprocessed_dir="./temp_analysis")
+    load(darshan_file=None, preprocessed_dir="./temp_analysis", data_paths_include=[])
         Loads the tool with the respective darshan file and processes the trace to load various structures for
         DLProfile tool.
 
@@ -139,11 +140,20 @@ class DLProfile(object):
     CreateIOTimeline(filepath=None, rank=None, time_step=None)
         Create a timeline of execution with timesteps, number of operations, and total I/O performed in bytes
 
-    GetIORequestDistribution(self, filepath=None, bins=100, threshold=AUTO)
-        Get a histogram of request sizes overall or per-file (if passed).
+    GetIORequestDistribution(self, filepath=None, rank=None, bins=100, threshold=AUTO)
+        Get a histogram of request sizes overall or per-file or per-rank (if passed).
 
     GetSummary()
         Get a dictionary of summary results from the DLProfiler.
+
+    GetHDF5FileSummary(filepath, only_special_summary=False)
+        Get a summary of HDF5 File
+
+    GetTFRecordSummary(filepath, features, only_special_summary=False)
+        Get a summary of TFRecord File
+
+    GetFileSummary(self, filepath, ext=UNKNOWN, tf_record_features=[])
+        Get a summary of File
     """
 
     def __init__(self):
@@ -158,6 +168,7 @@ class DLProfile(object):
         self._dxt_df = None
         self._file_access_pattern = None
         self._preprocessed_dir = None
+        self._tf_features = None
         return
 
     """
@@ -319,8 +330,8 @@ class DLProfile(object):
         self._dxt_df['bandwidth'] = self._dxt_df['Length'] / self._dxt_df['io_time']
         # Compute ext
         self._dxt_df['ext'] = self._dxt_df.Filename.apply(lambda x: x.split('.')[-1])
-        # If no extension then use TFRecord
-        self._dxt_df.loc[self._dxt_df['Filename'].str.contains("\.") == False, 'ext'] = "tfrecord"
+        # If no extension then use blank
+        self._dxt_df.loc[self._dxt_df['Filename'].str.contains("\.") == False, 'ext'] = ""
         # remove .py files
         self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains("py")]
         if len(data_paths_include) > 0:
@@ -401,11 +412,58 @@ class DLProfile(object):
                 pattern_file_map[key] = map_value
         return pattern_file_map
 
+    def _parse_tf_record(self, example_proto):
+        return tf.io.parse_single_example(example_proto, self._tf_features)
+
+    def _explore_hdf5(self, h5object, name):
+        """
+        Explores the hdf5 file hierarchically and retrieves all dataset information
+        Parameters
+        ----------
+        h5object: actual h5 object
+        name: name for the object
+
+        Returns
+        -------
+        map of information about the hdf5 object.
+        """
+        is_dataset = isinstance(h5object, h5py.Dataset)
+        is_group = isinstance(h5object, h5py.Group)
+        is_file = isinstance(h5object, h5py.File)
+
+        if is_group:
+            group_map = {"type": "group",
+                         "name": name}
+            key_maps = []
+            for key in h5object.keys():
+                key_map = self._explore_hdf5(h5object[key], key)
+                key_maps.append(key_map)
+            group_map["keys"] = key_maps
+            return group_map
+        elif is_file:
+            file_map = {"type": "file",
+                        "name": name}
+            key_maps = []
+            for key in h5object.keys():
+                key_map = self._explore_hdf5(h5object[key], key)
+                key_maps.append(key_map)
+            file_map["keys"] = key_maps
+            return file_map
+        elif is_dataset:
+            dataset_map = {"type": "dataset",
+                           "name": name,
+                           "size": h5object.size,
+                           "shape": h5object.shape,
+                           "obj": h5object}
+            return dataset_map
+        else:
+            return None
+
     """
     Public Functions
     """
 
-    def Load(self, darshan_file, preprocessed_dir="./temp_analysis", data_paths_include =[]):
+    def Load(self, darshan_file, preprocessed_dir="./temp_analysis", data_paths_include=[]):
         """
         This functions bootstraps the DLProfiler with the given darshan filename
 
@@ -413,7 +471,7 @@ class DLProfile(object):
         ----------
         :param darshan_file: Darshan's DXT trace file.
         :param preprocessed_dir: full path where post processing checkpoints can be made for faster loading.
-        :data_paths_include: paths to include for I/O Analysis
+        :param data_paths_include: paths to include for I/O Analysis
         :return: Exception with Error code 1000, if darshan file is not passed.
                  Exception with Error code 1002, if darshan file is invalid.
                  Exception with Error code 1003, if environment variable DARSHAN_BIN_DIR is not set correctly.
@@ -553,12 +611,16 @@ class DLProfile(object):
         """
         self._throw_if_not_loaded()
         if filepath is not None:
+            if not os.path.exists(filepath):
+                raise SystemExit(str(ErrorCodes.EC1009))
             file = self._file_access_pattern[filepath]
             size = pathlib.Path(file).stat().st_size
             return {filepath: size}
         else:
             file_size_map = {}
             for file in self._file_access_pattern:
+                if not os.path.exists(file):
+                    raise SystemExit(str(ErrorCodes.EC1009))
                 size = pathlib.Path(file).stat().st_size
                 file = os.path.splitext(ntpath.basename(file))[0]
                 file_size_map[file] = float(size)
@@ -718,4 +780,174 @@ class DLProfile(object):
                     "median": file_sizes.median()
                 }
             }
+        }
+
+    def GetHDF5FileSummary(self, filepath, only_special_summary=False):
+        """
+        Create a summary of the HDF5 file.
+        General summary includes:
+            - path: full path of the file
+            - filename: name of the file
+            - size: size of file in bytes
+            - ext: format of the file
+            - io_time: time spent by job in performing I/O on this file (in seconds)
+            - io_size: amount of I/O (in bytes) performed on this file
+            - special: A special summary is generate for HDF5 and TFRecord dataset
+                - for HDF5
+                    - a map of hiearchical structure of the file with dataset information
+                        - name: Name of the dataset
+                        - size: Size of the dataset
+                        - shape: shape of the dataset
+                        - obj: hdf5 dataset object for future processing
+        Parameters
+        ----------
+        filepath: full path of the file.
+        only_special_summary: if set to true only special summary is returned
+
+        Returns
+        -------
+        map of summary of file
+        """
+        self._throw_if_not_loaded()
+        if filepath is None:
+            raise Exception(str(ErrorCodes.EC1005))
+        if not os.path.exists(filepath):
+            raise SystemExit(str(ErrorCodes.EC1009))
+        file_ext_array = os.path.splitext(ntpath.basename(filepath))
+        filename = file_ext_array[0]
+        file_ext = filepath.split('.')[-1]
+        if file_ext == filename or file_ext != 'h5':
+            raise Exception(str(ErrorCodes.EC1006))
+        file_obj = h5py.File(filepath, "r")
+        special = self._explore_hdf5(file_obj, filename)
+        if only_special_summary:
+            return special
+        else:
+            temp_df = self._dxt_df[self._dxt_df['Filename'].eq(filepath)]
+            file_size = pathlib.Path(filepath).stat().st_size
+            return {
+                "path": filepath,
+                "filename": filename,
+                "size": file_size,
+                "ext": file_ext,
+                "io_time": temp_df['io_time'].sum(),
+                "io_size": temp_df['Length'].sum(),
+                "special": special
+            }
+
+    def GetTFRecordSummary(self, filepath, features, only_special_summary=False):
+        """
+        Create a summary of TFRecord file.
+        General summary includes:
+            - path: full path of the file
+            - filename: name of the file
+            - size: size of file in bytes
+            - ext: format of the file
+            - io_time: time spent by job in performing I/O on this file (in seconds)
+            - io_size: amount of I/O (in bytes) performed on this file
+            - special: A special summary is generate for HDF5 and TFRecord dataset
+                - for TFRecord:
+                    - Input: tf_record_features is required.
+                    - an list of processed records based on the features passed.
+        Parameters
+        ----------
+        filepath: full path of the file.
+        features: features to read TFRecord file
+        only_special_summary: if set to true only special summary is returned
+
+        Returns
+        -------
+        map of summary of TFRecord file
+        """
+        self._throw_if_not_loaded()
+        if filepath is None:
+            raise Exception(str(ErrorCodes.EC1005))
+        if not os.path.exists(filepath):
+            raise SystemExit(str(ErrorCodes.EC1009))
+        file_ext_array = os.path.splitext(ntpath.basename(filepath))
+        filename = file_ext_array[0]
+        file_ext = filepath.split('.')[-1]
+        if file_ext == filename or file_ext != 'tfrecord':
+            raise Exception(str(ErrorCodes.EC1007))
+        filenames = [filepath]
+        raw_dataset = tf.data.TFRecordDataset(filenames)
+        if len(features) == 0:
+            raise Exception(str(ErrorCodes.EC1008))
+        self._tf_features = features
+        special = raw_dataset.map(self._parse_tf_record, num_parallel_calls=POOL_SIZE)
+        if only_special_summary:
+            return special
+        else:
+            temp_df = self._dxt_df[self._dxt_df['Filename'].eq(filepath)]
+            file_size = pathlib.Path(filepath).stat().st_size
+            return {
+                "path": filepath,
+                "filename": filename,
+                "size": file_size,
+                "ext": file_ext,
+                "io_time": temp_df['io_time'].sum(),
+                "io_size": temp_df['Length'].sum(),
+                "special": special
+            }
+
+    def GetFileSummary(self, filepath, ext=UNKNOWN, tf_record_features=[]):
+        """
+        Create a summary of the file.
+        General summary includes:
+            - path: full path of the file
+            - filename: name of the file
+            - size: size of file in bytes
+            - ext: format of the file
+            - io_time: time spent by job in performing I/O on this file (in seconds)
+            - io_size: amount of I/O (in bytes) performed on this file
+            - special: A special summary is generate for HDF5 and TFRecord dataset
+                - for HDF5
+                    - a map of hiearchical structure of the file with dataset information
+                        - name: Name of the dataset
+                        - size: Size of the dataset
+                        - shape: shape of the dataset
+                        - obj: hdf5 dataset object for future processing
+                - for TFRecord:
+                    - Input: tf_record_features is required.
+                    - an list of processed records based on the features passed.
+        Parameters
+        ----------
+        filepath: full path of the file.
+        ext: recommended format of the file (Supported are h5 and tfrecord).
+        tf_record_features: if ext is tfrecord then tf_record_features are required.
+
+        Returns
+        -------
+        map of summary of file
+        """
+        self._throw_if_not_loaded()
+        if filepath is None:
+            raise Exception(str(ErrorCodes.EC1005))
+        if not os.path.exists(filepath):
+            raise SystemExit(str(ErrorCodes.EC1009))
+        temp_df = self._dxt_df[self._dxt_df['Filename'].eq(filepath)]
+        file_ext_array = os.path.splitext(ntpath.basename(filepath))
+        filename = file_ext_array[0]
+        if ext == UNKNOWN:
+            file_ext = filepath.split('.')[-1]
+        else:
+            file_ext = ext
+        special_summary = {}
+        if file_ext == filename:
+            file_ext = ""
+        elif file_ext == 'h5':
+            special_summary = self.GetHDF5FileSummary(filepath, only_special_summary=True)
+        elif file_ext == 'tfrecord':
+            if len(tf_record_features) == 0:
+                raise Exception(str(ErrorCodes.EC1008))
+            special_summary = self.GetTFRecordSummary(filepath, tf_record_features, only_special_summary=True)
+        file_size = pathlib.Path(filepath).stat().st_size
+        return {
+            "path": filepath,
+            "filename": filename,
+            "size": file_size,
+            "ext": file_ext,
+            "io_time": temp_df['io_time'].sum(),
+            "io_size": temp_df['Length'].sum(),
+            "special": special_summary
         }

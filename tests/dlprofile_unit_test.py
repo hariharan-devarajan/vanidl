@@ -20,13 +20,14 @@ import os
 import sys
 import pathlib
 
-sys.path.insert(0, pathlib.Path(__file__).parent.parent.absolute())
+#sys.path.insert(0, pathlib.Path(__file__).parent.parent.absolute())
 
 """
 Local Includes
 """
 from src.dlprofile import DLProfile
 from src.constants import *
+import tensorflow as tf
 
 
 def LoadEnv():
@@ -35,6 +36,7 @@ def LoadEnv():
 
 
 FILE_PATH = "/projects/datascience/dhari/datasets/cosmic_tagger/cosmic_tagging_train.h5"
+TF_FILE_PATH = "/projects/datascience/rzamora/data/imagenet/count.48.size.8m/train-00263-of-01024"
 DATAPATH_INCLUDES = ["/projects/datascience/dhari/datasets/cosmic_tagger/"]
 RANK = 0
 TIMESTEP_SEC = 1
@@ -216,6 +218,42 @@ class MyTestCase(unittest.TestCase):
         profile = DLProfile()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         summary = profile.GetSummary()
+        self.assertNotEqual(len(summary), 0)
+
+    def test_GetFileSummaryHDF5WithExt(self):
+        LoadEnv()
+        profile = DLProfile()
+        status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
+        summary = profile.GetFileSummary(FILE_PATH,ext='h5')
+        self.assertNotEqual(len(summary), 0)
+
+    def test_GetFileSummaryHDF5(self):
+        LoadEnv()
+        profile = DLProfile()
+        status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
+        summary = profile.GetFileSummary(FILE_PATH)
+        self.assertNotEqual(len(summary), 0)
+
+    def test_GetFileSummaryTFRecord(self):
+        LoadEnv()
+        profile = DLProfile()
+        status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
+        summary = profile.GetFileSummary(TF_FILE_PATH, ext="tfrecord", tf_record_features={
+              'image/encoded': tf.io.FixedLenFeature((), dtype=tf.string, default_value=''),
+              'image/source_id': tf.io.FixedLenFeature((), tf.string, default_value=''),
+              'image/height': tf.io.FixedLenFeature((), tf.int64, default_value=1),
+              'image/width': tf.io.FixedLenFeature((), tf.int64, default_value=1),
+              'image/object/bbox/xmin': tf.io.VarLenFeature(dtype=tf.float32),
+              'image/object/bbox/ymin': tf.io.VarLenFeature(dtype=tf.float32),
+              'image/object/bbox/xmax': tf.io.VarLenFeature(dtype=tf.float32),
+              'image/object/bbox/ymax': tf.io.VarLenFeature(dtype=tf.float32),
+              'image/object/class/label': tf.io.VarLenFeature(dtype=tf.int64),
+              'image/object/class/text': tf.io.FixedLenFeature((), dtype=tf.string, default_value=''),
+              'image/colorspace': tf.io.FixedLenFeature((), tf.string, default_value=''),
+              'image/channels': tf.io.FixedLenFeature((), tf.int64, default_value=1),
+              'image/format': tf.io.FixedLenFeature((), tf.string, default_value=''),
+              'image/filename': tf.io.FixedLenFeature((), tf.string, default_value='')
+          })
         self.assertNotEqual(len(summary), 0)
 
 
