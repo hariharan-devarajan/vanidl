@@ -13,8 +13,6 @@
  If not, see <http://www.gnu.org/licenses/>.
 """
 """
-Constants used within the profiler
+Configurations used within the profiler
 """
-DARSHAN_DIR='DARSHAN_DIR'
-DLPROFILE_DIR='DLPROFILE_DIR'
-AUTO = -1
+POOL_SIZE = 16

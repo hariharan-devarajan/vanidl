@@ -23,18 +23,23 @@ import ntpath
 import numpy
 import pathlib
 import math
+import json
 
 """
 Pip Packages
 """
 import pandas as pd
-from progressbar import ProgressBar, FormatLabel
 
 """
 Local Includes
 """
 from src.error_code import ErrorCodes
 from src.constants import *
+from src.configuraton import *
+
+"""
+Global Methods
+"""
 
 
 def _exec_cmd(command):
@@ -44,11 +49,60 @@ def _exec_cmd(command):
     :return: stdout: standard output of command , stderr  standard error of command
     """
     command_array = shlex.split(command)
-    out = subprocess.Popen([command_array],
+    out = subprocess.Popen(command_array,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
+
     stdout, stderr = out.communicate()
-    return stdout, stderr
+    lines_b = stdout.splitlines()
+    lines = []
+    for line in lines_b:
+        lines.append(line.decode("utf-8"))
+    return lines, stderr
+
+
+def _exec_cmds(commands):
+    """
+    Executes a command on Shell and returns stdout and stderr from the command.
+    :param command: the string of the command to be executed
+    :return: stdout: standard output of command , stderr  standard error of command
+    """
+    out = [None] * len(commands)
+    prev = None
+
+    for i, command in enumerate(commands):
+        command_array = shlex.split(command)
+        if i == 0:
+            out[i] = subprocess.Popen(command_array,
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.STDOUT)
+        else:
+            out[i] = subprocess.Popen(command_array,
+                                      stdin=out[i - 1].stdout,
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.STDOUT)
+    for i in range(len(commands)):
+        stdout, stderr = out[i].communicate()
+    #stdout, stderr = out[len(commands) - 1].communicate()
+    lines_b = stdout.splitlines()
+    lines = []
+    for line in lines_b:
+        lines.append(line.decode("utf-8"))
+    return lines, stderr
+
+
+def progress(count, total, status=''):
+    bar_len = 60
+    filled_len = int(round(bar_len * count / float(total)))
+    percents = round(100.0 * count / float(total), 1)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+    if count == 1:
+        print("")
+    print("\r[{}] {}% {} of {} {} ".format(bar, percents, count, total, status), end='')
+    if count == total:
+        print("")
+    os.sys.stdout.flush()
+
 
 
 class DLProfile(object):
@@ -79,7 +133,7 @@ class DLProfile(object):
     GetFileSizes(filepath=None)
         Get map of sizes of the files accessed by the job
 
-    IOPerRank()
+    GetIOPerRank()
         Get the total I/O time per rank in an array
 
     CreateIOTimeline(filepath=None, rank=None, time_step=None)
@@ -130,14 +184,14 @@ class DLProfile(object):
         dxt_file = os.path.exists(self._darshan_file)
         darshan_path = True
         dlprofile_bin_path = True
-        if DARSHAN_BIN_DIR not in os.environ:
+        if DARSHAN_DIR not in os.environ:
             darshan_path = False
         else:
-            darshan_path = os.path.exists(os.environ[DARSHAN_BIN_DIR])
-        if DLPROFILE_BIN_DIR not in os.environ:
+            darshan_path = os.path.exists("{}/bin".format(os.environ[DARSHAN_DIR]))
+        if DLPROFILE_DIR not in os.environ:
             dlprofile_bin_path = False
         else:
-            dlprofile_bin_path = os.path.exists(os.environ[DLPROFILE_BIN_DIR])
+            dlprofile_bin_path = os.path.exists("{}/bin".format(os.environ[DLPROFILE_DIR]))
         is_valid = True
         if not dxt_file:
             self._errors.append(str(ErrorCodes.EC1002))
@@ -149,8 +203,8 @@ class DLProfile(object):
             self._errors.append(str(ErrorCodes.EC1004))
             is_valid = False
         if is_valid:
-            self._darshan_bin_dir = darshan_path
-            self._dl_profile_bin_path = dlprofile_bin_path
+            self._darshan_bin_dir = "{}/bin".format(os.environ[DARSHAN_DIR])
+            self._dl_profile_bin_path = "{}/bin".format(os.environ[DLPROFILE_DIR])
         return is_valid
 
     def _check_loaded(self):
@@ -209,12 +263,16 @@ class DLProfile(object):
         cmd = "{} {}".format(self._get_darshan_dxt_exe(), self._darshan_file)
         lines, stderr = _exec_cmd(cmd)
         io_lines = False
-        df = pd.DataFrame(
-            columns=['Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End'])
+        pb_total = len(lines)
+        df = pd.DataFrame(index=numpy.arange(pb_total),
+                          columns=['Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start',
+                                   'End'])
         temp_filename = ""
-        widgets = [FormatLabel('Processed: %(value)d lines of {} (in: %(elapsed)s)'.format(len(lines)))]
-        pbar = ProgressBar(widgets=widgets)
-        for line in pbar(lines):
+        i = 1
+        index = 0
+        for line in lines:
+            progress(i, pb_total, status='Parsing DXT File')
+            i += 1
             if line == '':
                 io_lines = False
                 continue
@@ -227,16 +285,17 @@ class DLProfile(object):
             elif io_lines:
                 # Module,Rank, Wt/Rd, Segment,Offset,Length,Start(s),End(s)
                 vals = line.split()
-                new_row = {'Module': vals[0],
-                           'Filename': temp_filename,
-                           'Rank': int(vals[1]),
-                           'Operation': vals[2],
-                           'Segment': int(vals[3]),
-                           'Offset': int(vals[4]),
-                           'Length': int(vals[5]),
-                           'Start': float(vals[6]),
-                           'End': float(vals[7])}
-                df = df.append(new_row, ignore_index=True)
+                df.loc[index] = {'Module': vals[0],
+                                 'Filename': temp_filename,
+                                 'Rank': int(vals[1]),
+                                 'Operation': vals[2],
+                                 'Segment': int(vals[3]),
+                                 'Offset': int(vals[4]),
+                                 'Length': int(vals[5]),
+                                 'Start': float(vals[6]),
+                                 'End': float(vals[7])}
+                index += 1
+        df = df.drop(df.index[index:])
         return df
 
     def _pre_process_dxt_df(self):
@@ -272,37 +331,45 @@ class DLProfile(object):
         which calculates the access pattern to be sequential, consecutive, or random.
         :return: a file map containing per file access pattern observed by darshan.
         """
-        cmd = "{}  --file-list {} | egrep -v '^(#|$)' | cut -f 1-2 | sort -n | uniq | \
-                while read -r hash filepath stuff ; do \
-                echo $hash $filepath; \
-                done".format(self._get_darshan_exe(), self._darshan_file)
-        lines, stderr = _exec_cmd(cmd)
+        cmds = ["{}  --file-list {}".format(self._get_darshan_exe(),
+                                            self._darshan_file),
+                "egrep -v '^(#|$)'",
+                "cut -f 1-2",
+                "sort -n",
+                "uniq"]
+        lines, stderr = _exec_cmds(cmds)
         file_hash_map = {}
         self._dxt_df['hash'] = 0
-        widgets = [FormatLabel('Processed: %(value)d lines of {} (in: %(elapsed)s)'.format(len(lines)))]
-        pbar = ProgressBar(widgets=widgets)
-        for line in pbar(lines):
+        pb_total = len(lines)
+        i = 1
+        for line in lines:
+            progress(i, pb_total, status='Analyzing Access Pattern')
+            i += 1
             vals = line.split()
             # print(vals)
             self._dxt_df.loc[self._dxt_df['Filename'] == vals[1], 'hash'] = vals[0]
             file_hash_map[vals[1]] = vals[0]
         pattern_file_map = {}
+        pb_total = len(lines)
+        i = 1
         for key in file_hash_map:
+            progress(i, pb_total, status='Running Darshan Perl Script')
+            i += 1
             hash_val = file_hash_map[key]
             if key.find(".py") == -1 and key.find("cpython") == -1 and key.find("STDOUT") == -1:
                 file = os.path.splitext(ntpath.basename(key))[0]
-                dest_file = "{}{}.darshan".format(self.preprocessing_dir_, file)
+                dest_file = "{}/{}.darshan".format(self._preprocessed_dir, file)
                 if os.path.exists(dest_file):
                     os.remove(dest_file)
                 cmd = "{} --file {} {} {}".format(self._get_darshan_convert_exe(), hash_val, self._darshan_file,
                                                   dest_file)
                 output, stderr = _exec_cmd(cmd)
-                cmd = "{} {} --verbose --output {}{}.pdf".format(self._get_darshan_job_summary_exe(),
-                                                                 dest_file,
-                                                                 self.preprocessing_dir_,
-                                                                 file,
-                                                                 self.preprocessing_dir_,
-                                                                 file)
+                cmd = "{} {} --verbose --output {}/{}.pdf".format(self._get_darshan_job_summary_exe(),
+                                                                  dest_file,
+                                                                  self._preprocessed_dir,
+                                                                  file,
+                                                                  self._preprocessed_dir,
+                                                                  file)
 
                 lines, stderr = _exec_cmd(cmd)
                 map_value = {"name": file,
@@ -348,10 +415,9 @@ class DLProfile(object):
         if darshan_file is None:
             raise SystemExit(str(ErrorCodes.EC1000))
         self._darshan_file = darshan_file
-        self._loaded = True
         self._preprocessed_dir = preprocessed_dir
         if not self._verify_env_path():
-            raise SystemExit(self._error_str())
+            return False
         if not os.path.exists(preprocessed_dir):
             os.mkdir(preprocessed_dir)
         io_df_filename = "{}/io_df.csv".format(preprocessed_dir)
@@ -360,8 +426,19 @@ class DLProfile(object):
             self._dxt_df.to_csv(index=False, path_or_buf=io_df_filename)
         else:
             self._dxt_df = pd.read_csv(io_df_filename)
+            print("Loaded Pre-processed DXT from file: {}".format(io_df_filename))
         self._pre_process_dxt_df()
-        self._file_access_pattern = self._analyze_access_pattern()
+        pattern_json = "{}/pattern.json".format(preprocessed_dir)
+        if not os.path.exists(pattern_json):
+            self._file_access_pattern = self._analyze_access_pattern()
+            with open(pattern_json, 'w') as outfile:
+                json.dump(self._file_access_pattern, outfile)
+        else:
+            with open(pattern_json) as json_file:
+                self._file_access_pattern = json.load(json_file)
+            print("Loaded Pre-processed Pattern file: {}".format(pattern_json))
+        self._errors = []
+        self._loaded = True
         return True
 
     def GetDXTAsDF(self):
@@ -378,10 +455,10 @@ class DLProfile(object):
         :return: time in seconds.
         """
         self._throw_if_not_loaded()
-        cmd = "{} {} | \
-        egrep 'run time' | \
-        cut -d' ' -f4".format(self._get_darshan_dxt_exe(), self._darshan_file)
-        return_val, errors = _exec_cmd(cmd)
+        cmds = ["{} {}".format(self._get_darshan_dxt_exe(), self._darshan_file),
+                "egrep 'run time'",
+                "cut -d' ' -f4"]
+        return_val, stderr = _exec_cmds(cmds)
         job_time = float(return_val[0])
         return job_time
 
@@ -399,7 +476,7 @@ class DLProfile(object):
             temp_df = temp_df[temp_df['Filename'].eq(filepath)]
         if rank is not None:
             temp_df = temp_df[temp_df['Rank'].eq(rank)]
-        return self.temp_df['io_time'].sum()
+        return temp_df['io_time'].sum()
 
     def GetIOSize(self, filepath=None, rank=None):
         """
@@ -415,7 +492,7 @@ class DLProfile(object):
             temp_df = temp_df[temp_df['Filename'].eq(filepath)]
         if rank is not None:
             temp_df = temp_df[temp_df['Rank'].eq(rank)]
-        return self.temp_df['Length'].sum()
+        return temp_df['Length'].sum()
 
     def GetAccessPattern(self, filepath=None):
         """
@@ -479,7 +556,7 @@ class DLProfile(object):
                 file_size_map[file] = float(size)
             return file_size_map
 
-    def IOPerRank(self):
+    def GetIOPerRank(self):
         """
         Returns a array of I/O per Rank for the job.
         :return: a array of I/O per rank with index = rank
@@ -490,7 +567,7 @@ class DLProfile(object):
             io_time_array.append(self.GetIOSize(rank=rank))
         return numpy.array(io_time_array)
 
-    def CreateIOTimeline(self, filepath=None, rank=None, time_step=None):
+    def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True):
         """
         Create a timeline for I/O where per timestep, we calculate number of operations and amount of I/O.
         if filepath is set, data is further filtered by filepath
@@ -512,6 +589,10 @@ class DLProfile(object):
             temp_df = temp_df[temp_df['Rank'].eq(rank)]
             tm_df_filename = "{}_{}".format(tm_df_filename, rank)
         tm_df_filename = "{}.csv".format(tm_df_filename)
+        if os.path.exists(tm_df_filename):
+            df_time = pd.read_csv(tm_df_filename)
+            print("Loaded Pre-processed Timeline from file: {}".format(tm_df_filename))
+            return df_time
         min_time = round(0, 3)
         max_time = round(self.GetJobTime(), 3)
         if temp_df['End'].max() > max_time:
@@ -522,9 +603,11 @@ class DLProfile(object):
         data_points_series = numpy.arange(0, data_points, 1)
         count_series = numpy.zeros(data_points)
         sum_series = numpy.zeros(data_points)
-        widgets = [FormatLabel('Processed: %(value)d lines of {} (in: %(elapsed)s)'.format(temp_df.count()['Module']))]
-        pbar = ProgressBar(widgets=widgets)
-        for index, row in pbar(temp_df.iterrows()):
+        pb_total = temp_df.count()['Module'];
+        i = 1
+        for index, row in temp_df.iterrows():
+            progress(i, pb_total, status='Creating Timeline')
+            i += 1
             start_index = math.floor(float(row['Start']) / time_step)
             end_index = math.ceil(float(row['End']) / time_step)
             # print(row['Start'],row['End'],start_index,end_index)
@@ -533,9 +616,11 @@ class DLProfile(object):
                 sum_series[n] += float(row['Length'])
         df_time = pd.DataFrame(
             {'time_step': data_points_series, 'operation_count': count_series, 'io_bytes': sum_series})
+        if save:
+            df_time.to_csv(index=False, path_or_buf=tm_df_filename)
         return df_time
 
-    def GetIORequestDistribution(self, filepath=None, bins=100, threshold=AUTO):
+    def GetIORequestDistribution(self, filepath=None, rank=None, bins=100, threshold=AUTO):
         """
         Returns a 2d series of value counts for given bins of io sizes.
         if filepath is passed, data is filtered by filename
@@ -543,6 +628,7 @@ class DLProfile(object):
         and threshold can be used to ignore points less than the given threshold.
         By default threshold is set to 1/1000 of the total sum of counts.
         :param filepath: filters the data by filepath
+        :param rank: filters the data by rank
         :param bins: sets the bins for the histogram
         :param threshold: sets the threshold to ignore on histogram
         :return: a dataframe object which can be plotted using plot function.
@@ -551,6 +637,8 @@ class DLProfile(object):
         temp_df = self._dxt_df
         if filepath is not None:
             temp_df = temp_df[temp_df['Filename'].eq(filepath)]
+        if rank is not None:
+            temp_df = temp_df[temp_df['Rank'].eq(rank)]
         counts = temp_df['Length'].value_counts(bins=bins)
         if threshold is AUTO:
             threshold = temp_df['Length'].count() * .001
