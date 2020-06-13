@@ -298,7 +298,7 @@ class DLProfile(object):
         df = df.drop(df.index[index:])
         return df
 
-    def _pre_process_dxt_df(self):
+    def _pre_process_dxt_df(self, data_paths_include):
         """
         Processes the DXT Dataframe and computes additional columns. Main transformations are:
             - Change Filename into categorical column.
@@ -306,6 +306,7 @@ class DLProfile(object):
             - Compute per operation Bandwidth achieved.
             - Extract Extension of the filename.
             - Remove python files which were traced.
+        :param: data_paths_include: paths to include
         :return: A Processed DXT dataframe
         """
         # make Filename categorical
@@ -322,6 +323,9 @@ class DLProfile(object):
         self._dxt_df.loc[self._dxt_df['Filename'].str.contains("\.") == False, 'ext'] = "tfrecord"
         # remove .py files
         self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains("py")]
+        if len(data_paths_include) > 0:
+            for data_path in data_paths_include:
+                self._dxt_df = self._dxt_df[self._dxt_df['Filename'].str.contains(data_path)]
         return self._dxt_df
 
     def _analyze_access_pattern(self):
@@ -401,11 +405,15 @@ class DLProfile(object):
     Public Functions
     """
 
-    def Load(self, darshan_file, preprocessed_dir="./temp_analysis"):
+    def Load(self, darshan_file, preprocessed_dir="./temp_analysis", data_paths_include =[]):
         """
         This functions bootstraps the DLProfiler with the given darshan filename
+
+        Parameters
+        ----------
         :param darshan_file: Darshan's DXT trace file.
         :param preprocessed_dir: full path where post processing checkpoints can be made for faster loading.
+        :data_paths_include: paths to include for I/O Analysis
         :return: Exception with Error code 1000, if darshan file is not passed.
                  Exception with Error code 1002, if darshan file is invalid.
                  Exception with Error code 1003, if environment variable DARSHAN_BIN_DIR is not set correctly.
@@ -427,7 +435,7 @@ class DLProfile(object):
         else:
             self._dxt_df = pd.read_csv(io_df_filename)
             print("Loaded Pre-processed DXT from file: {}".format(io_df_filename))
-        self._pre_process_dxt_df()
+        self._pre_process_dxt_df(data_paths_include)
         pattern_json = "{}/pattern.json".format(preprocessed_dir)
         if not os.path.exists(pattern_json):
             self._file_access_pattern = self._analyze_access_pattern()
