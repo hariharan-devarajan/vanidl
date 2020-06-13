@@ -83,9 +83,9 @@ def _exec_cmds(commands):
                                       stdin=out[i - 1].stdout,
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.STDOUT)
-    for i in range(len(commands)):
-        stdout, stderr = out[i].communicate()
-    # stdout, stderr = out[len(commands) - 1].communicate()
+    #for i in range(len(commands)):
+    #    stdout, stderr = out[i].communicate()
+    stdout, stderr = out[len(commands) - 1].communicate()
     lines_b = stdout.splitlines()
     lines = []
     for line in lines_b:
@@ -336,6 +336,7 @@ class DLProfile(object):
         # remove .py files
         self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains("py")]
         if len(data_paths_include) > 0:
+            #print(len(data_paths_include))
             for data_path in data_paths_include:
                 self._dxt_df = self._dxt_df[self._dxt_df['Filename'].str.contains(data_path)]
         return self._dxt_df
@@ -363,12 +364,14 @@ class DLProfile(object):
                 progress(i, pb_total, status='Analyzing Access Pattern')
             i += 1
             vals = line.split()
-            # print(vals)
-            self._dxt_df.loc[self._dxt_df['Filename'] == vals[1], 'hash'] = vals[0]
-            file_hash_map[vals[1]] = vals[0]
+            #print(vals)
+            if vals[1] in self._dxt_df['Filename'].unique():
+                self._dxt_df.loc[self._dxt_df['Filename'] == vals[1], 'hash'] = vals[0]
+                file_hash_map[vals[1]] = vals[0]
         pattern_file_map = {}
         pb_total = len(lines)
         i = 1
+        #print(file_hash_map)
         for key in file_hash_map:
             if i % 100 == 0 or i == pb_total:
                 progress(i, pb_total, status='Running Darshan Perl Script')
@@ -382,7 +385,7 @@ class DLProfile(object):
                 cmd = "{} --file {} {} {}".format(self._get_darshan_convert_exe(), hash_val, self._darshan_file,
                                                   dest_file)
                 output, stderr = _exec_cmd(cmd)
-                cmd = "{} {} --verbose --output {}/{}.pdf".format(self._get_darshan_job_summary_exe(),
+                cmd = "perl {} {} --verbose --output {}/{}.pdf".format(self._get_darshan_job_summary_exe(),
                                                                   dest_file,
                                                                   self._preprocessed_dir,
                                                                   file,
@@ -390,6 +393,7 @@ class DLProfile(object):
                                                                   file)
 
                 lines, stderr = _exec_cmd(cmd)
+                #print(lines)
                 map_value = {"name": file,
                              "read": [0, 0, 0],
                              "write": [0, 0, 0],
@@ -466,7 +470,7 @@ class DLProfile(object):
     Public Functions
     """
 
-    def Load(self, darshan_file, preprocessed_dir="./temp_analysis", data_paths_include=[]):
+    def Load(self, darshan_file, preprocessed_dir="/tmp/temp_analysis", data_paths_include=[]):
         """
         This functions bootstraps the DLProfiler with the given darshan filename
 
@@ -489,7 +493,8 @@ class DLProfile(object):
             return False
         if not os.path.exists(preprocessed_dir):
             os.mkdir(preprocessed_dir)
-        io_df_filename = "{}/io_df.csv".format(preprocessed_dir)
+        filename = os.path.splitext(ntpath.basename(darshan_file))[0]
+        io_df_filename = "{}/{}_io_df.csv".format(preprocessed_dir,filename)
         if not os.path.exists(io_df_filename):
             self._dxt_df = self._parse_dxt_trace()
             self._dxt_df.to_csv(index=False, path_or_buf=io_df_filename)
@@ -497,7 +502,7 @@ class DLProfile(object):
             self._dxt_df = pd.read_csv(io_df_filename)
             print("Loaded Pre-processed DXT from file: {}".format(io_df_filename))
         self._pre_process_dxt_df(data_paths_include)
-        pattern_json = "{}/pattern.json".format(preprocessed_dir)
+        pattern_json = "{}/{}_pattern.json".format(preprocessed_dir,filename)
         if not os.path.exists(pattern_json):
             self._file_access_pattern = self._analyze_access_pattern()
             with open(pattern_json, 'w') as outfile:
@@ -615,15 +620,17 @@ class DLProfile(object):
         self._throw_if_not_loaded()
         if filepath is not None:
             if not os.path.exists(filepath):
+                print("file not found {}".format(filepath))
                 raise SystemExit(str(ErrorCodes.EC1009))
             file = self._file_access_pattern[filepath]
-            size = pathlib.Path(file).stat().st_size
+            size = pathlib.Path(filepath).stat().st_size
             return {filepath: size}
         else:
             file_size_map = {}
             for file in self._file_access_pattern:
                 if not os.path.exists(file):
-                    raise SystemExit(str(ErrorCodes.EC1009))
+                    print("file not found {}".format(file))
+                    raise SystemExit(str(ErrorCodes.EC1009).format(file))
                 size = pathlib.Path(file).stat().st_size
                 file = os.path.splitext(ntpath.basename(file))[0]
                 file_size_map[file] = float(size)
@@ -637,7 +644,7 @@ class DLProfile(object):
         self._throw_if_not_loaded()
         io_time_array = []
         for rank in self._dxt_df['Rank'].unique():
-            io_time_array.append(self.GetIOSize(rank=rank))
+            io_time_array.append(self.GetIOTime(rank=rank))
         return numpy.array(io_time_array)
 
     def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True):
@@ -653,7 +660,8 @@ class DLProfile(object):
         """
         self._throw_if_not_loaded()
         temp_df = self._dxt_df
-        tm_df_filename = "{}/tm_df".format(self._preprocessed_dir)
+        trace_filename = os.path.splitext(ntpath.basename(self._darshan_file))[0]
+        tm_df_filename = "{}/{}_tm_df".format(self._preprocessed_dir, trace_filename)
         if filepath is not None:
             temp_df = temp_df[temp_df['Filename'].eq(filepath)]
             filename = os.path.splitext(ntpath.basename(filepath))[0]
@@ -751,11 +759,11 @@ class DLProfile(object):
         file_sizes = numpy.array(file_sizes)
         return {
             "job_time": self.GetJobTime(),
-            "total_io_time": self.IOPerRank().max(),
+            "total_io_time": self.GetIOPerRank().max(),
             "total_io_bytes": self.GetIOSize(),
             "io_interface_used": self._dxt_df['Module'].unique(),
             "io_operations_used": self._dxt_df['Operation'].unique(),
-            "files_used": self._dxt_df["Filename"].unique(),
+            "files_used": self._dxt_df["Filename"].unique().tolist(),
             "num_ranks": self._dxt_df["Rank"].nunique(),
             "data_transfer_size": {
                 "min": self._dxt_df["Length"].min(),
@@ -781,7 +789,7 @@ class DLProfile(object):
                     "min": file_sizes.min(),
                     "max": file_sizes.max(),
                     "mean": file_sizes.mean(),
-                    "median": file_sizes.median()
+                    "median": numpy.median(file_sizes)
                 }
             }
         }

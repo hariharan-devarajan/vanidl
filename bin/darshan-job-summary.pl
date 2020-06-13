@@ -9,7 +9,8 @@ my $PREFIX="/soft/perftools/darshan/darshan-3.1.8";
 
 use warnings;
 use lib "/soft/perftools/darshan/darshan-3.1.8/lib";
-use lib "/usr/lib/perl5/5.18.2/Pod/LaTeX.pm";
+use lib "/usr/lib/perl5/5.18.2";
+#use "/usr/lib/perl5/5.18.2/Pod/LaTeX.pm";
 use Pod::LaTeX;
 use TeX::Encode;
 use Encode;
