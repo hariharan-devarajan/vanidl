@@ -4,16 +4,17 @@
 - Set dl_profile dir DLPROFILE_DIR
 - What Copyright to use
 - Package dependencies:
-    - pandas
-    - progressbar
     - pip3 install -r requirements.txt
-    - load texlive module
+- load texlive module
 
 ### TODO:
 - Create an example codes
-    - with reads hdf5 file
+    - HDF5
     - TFRecord
+    - STDIO Interface
 - Add Dataset processing codes
+    - hdf5
+    - TFRecord
 - Handle Exceptions of when no DXT tracing is present.
     - Explore information we can get from General Parser.
 - Sample scripts for Theta to submit a job with Darshan
