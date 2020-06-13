@@ -102,7 +102,7 @@ def progress(count, total, status=''):
         print("")
     print("\r[{}] {}% {} of {} {} ".format(bar, percents, count, total, status), end='')
     if count == total:
-        print("")
+    	print("")
     os.sys.stdout.flush()
 
 
@@ -282,7 +282,8 @@ class DLProfile(object):
         i = 1
         index = 0
         for line in lines:
-            progress(i, pb_total, status='Parsing DXT File')
+            if i % 100 == 0 or i == pb_total:
+            	progress(i, pb_total, status='Parsing DXT File')
             i += 1
             if line == '':
                 io_lines = False
@@ -358,7 +359,8 @@ class DLProfile(object):
         pb_total = len(lines)
         i = 1
         for line in lines:
-            progress(i, pb_total, status='Analyzing Access Pattern')
+            if i % 100 == 0 or i == pb_total:
+				progress(i, pb_total, status='Analyzing Access Pattern')
             i += 1
             vals = line.split()
             # print(vals)
@@ -368,7 +370,8 @@ class DLProfile(object):
         pb_total = len(lines)
         i = 1
         for key in file_hash_map:
-            progress(i, pb_total, status='Running Darshan Perl Script')
+            if i % 100 == 0 or i == pb_total:
+	        	progress(i, pb_total, status='Running Darshan Perl Script')
             i += 1
             hash_val = file_hash_map[key]
             if key.find(".py") == -1 and key.find("cpython") == -1 and key.find("STDOUT") == -1:
@@ -676,7 +679,8 @@ class DLProfile(object):
         pb_total = temp_df.count()['Module'];
         i = 1
         for index, row in temp_df.iterrows():
-            progress(i, pb_total, status='Creating Timeline')
+            if i % 100 == 0 or i == pb_total:
+	        	progress(i, pb_total, status='Creating Timeline')
             i += 1
             start_index = math.floor(float(row['Start']) / time_step)
             end_index = math.ceil(float(row['End']) / time_step)
