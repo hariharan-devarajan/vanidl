@@ -34,7 +34,7 @@ More examples are [here](https://github.com/hariharan-devarajan/dlprofiler/tree/
 
 ### On Theta
 ```bash
-modul
+module load VaniDL
 ```
 
 ## Getting Started
@@ -51,7 +51,7 @@ modul
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTk1NDc4MDQzMCwtMTMzMzAyNjEwNSwtMT
+eyJoaXN0b3J5IjpbLTUyMjA5MDk5NywtMTMzMzAyNjEwNSwtMT
 QyODQyNzIwMiwxMDk3MzcyNTk4LDI1NjQ5MjI5NCwxODQ5MTg0
 NTI0XX0=
 -->
