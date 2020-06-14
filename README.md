@@ -27,8 +27,8 @@ tl = profile.CreateIOTimeline()
 plt.figure(figsize=(20,4))
 plt.grid()
 plt.plot(tl['time_step'], tl['operation_count']);
-![Operation Timeline](https://photos.app.goo.gl/D6p2Tzstb54PDBKp8)
 ```
+![Operation Timeline](https://photos.app.goo.gl/D6p2Tzstb54PDBKp8)
 
 ## Installation
 
@@ -46,7 +46,7 @@ plt.plot(tl['time_step'], tl['operation_count']);
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyNzcyNjU3MDAsLTEzMzMwMjYxMDUsLT
+eyJoaXN0b3J5IjpbLTE5MTg5MzE2NjYsLTEzMzMwMjYxMDUsLT
 E0Mjg0MjcyMDIsMTA5NzM3MjU5OCwyNTY0OTIyOTQsMTg0OTE4
 NDUyNF19
 -->
