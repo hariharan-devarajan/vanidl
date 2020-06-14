@@ -1,6 +1,6 @@
-# Deep Learning Profiler
+# DL Profiler
 
-Deep Learning Profiler is an analysis 
+Deep Learning Profiler is an tool for analyzing 
 
 ## Overview
 
@@ -20,6 +20,6 @@ Deep Learning Profiler is an analysis
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTY3OTE1ODAyOCwtMTQyODQyNzIwMiwxMD
-k3MzcyNTk4LDI1NjQ5MjI5NCwxODQ5MTg0NTI0XX0=
+eyJoaXN0b3J5IjpbLTcxMTMzNzEwLC0xNDI4NDI3MjAyLDEwOT
+czNzI1OTgsMjU2NDkyMjk0LDE4NDkxODQ1MjRdfQ==
 -->
