@@ -28,8 +28,14 @@ plt.figure(figsize=(20,4))
 plt.grid()
 plt.plot(tl['time_step'], tl['operation_count']);
 ```
+More examples are [here](https://github.com/hariharan-devarajan/dlprofiler/tree/master/examples)
 
 ## Installation
+
+### On Theta
+```bash
+modul
+```
 
 ## Getting Started
 
@@ -45,7 +51,7 @@ plt.plot(tl['time_step'], tl['operation_count']);
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIwMzU3MjIwNTksLTEzMzMwMjYxMDUsLT
-E0Mjg0MjcyMDIsMTA5NzM3MjU5OCwyNTY0OTIyOTQsMTg0OTE4
-NDUyNF19
+eyJoaXN0b3J5IjpbLTk1NDc4MDQzMCwtMTMzMzAyNjEwNSwtMT
+QyODQyNzIwMiwxMDk3MzcyNTk4LDI1NjQ5MjI5NCwxODQ5MTg0
+NTI0XX0=
 -->
