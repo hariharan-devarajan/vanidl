@@ -63,18 +63,19 @@ module load VaniDL
 See _[Getting Started with VaniDL](http://vanidl.github.io/getting_started)_ to learn about VaniDL basic functionalities or start browsing _[TFLearn Tutorials](http://vanidl.github.io/tutorials)_.
 
 ### Examples
-
-### Documentations
-
-### Usage Examples
+There are many examples of analysis available, see _[Examples](http://vanidl.github.io/examples)_.
 
 ## Contributions
+This is the first release of VaniDL, if you find any bug, please report it in the GitHub issues section.
 
+Improvements and requests for new features are more than welcome! Do not hesitate to twist and tweak VaniDL, and send pull-requests.
+
+For more info:  _[Contribute to TFLearn](http://tflearn.org/contributions)_.
 ## License
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEzOTU2MzEwMjIsLTEzMjE4OTQ2NzksLT
-EzMzMwMjYxMDUsLTE0Mjg0MjcyMDIsMTA5NzM3MjU5OCwyNTY0
-OTIyOTQsMTg0OTE4NDUyNF19
+eyJoaXN0b3J5IjpbOTE0NTY3NjA3LC0xMzIxODk0Njc5LC0xMz
+MzMDI2MTA1LC0xNDI4NDI3MjAyLDEwOTczNzI1OTgsMjU2NDky
+Mjk0LDE4NDkxODQ1MjRdfQ==
 -->
