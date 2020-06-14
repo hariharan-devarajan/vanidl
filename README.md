@@ -32,6 +32,12 @@ More examples are [here](https://github.com/hariharan-devarajan/dlprofiler/tree/
 
 ## Installation
 
+### Requirements
+- numpy==1.18.5
+- pandas==1.0.4
+- h5py==2.10.0
+- tensorflow~=2.2.0
+
 ### On Theta
 ```bash
 module load VaniDL
@@ -51,7 +57,7 @@ module load VaniDL
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTUyMjA5MDk5NywtMTMzMzAyNjEwNSwtMT
-QyODQyNzIwMiwxMDk3MzcyNTk4LDI1NjQ5MjI5NCwxODQ5MTg0
-NTI0XX0=
+eyJoaXN0b3J5IjpbLTEzMjE4OTQ2NzksLTEzMzMwMjYxMDUsLT
+E0Mjg0MjcyMDIsMTA5NzM3MjU5OCwyNTY0OTIyOTQsMTg0OTE4
+NDUyNF19
 -->
