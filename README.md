@@ -70,12 +70,12 @@ This is the first release of VaniDL, if you find any bug, please report it in th
 
 Improvements and requests for new features are more than welcome! Do not hesitate to twist and tweak VaniDL, and send pull-requests.
 
-For more info:  _[Contribute to TFLearn](http://tflearn.org/contributions)_.
+For more info:  _[Contribute to VaniDL](http://vanidl.github.io/contributions)_.
 ## License
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTE0NTY3NjA3LC0xMzIxODk0Njc5LC0xMz
-MzMDI2MTA1LC0xNDI4NDI3MjAyLDEwOTczNzI1OTgsMjU2NDky
-Mjk0LDE4NDkxODQ1MjRdfQ==
+eyJoaXN0b3J5IjpbMTQxNzk3ODg0OCwtMTMyMTg5NDY3OSwtMT
+MzMzAyNjEwNSwtMTQyODQyNzIwMiwxMDk3MzcyNTk4LDI1NjQ5
+MjI5NCwxODQ5MTg0NTI0XX0=
 -->
