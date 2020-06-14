@@ -21,6 +21,15 @@ status = profile.Load("./run1.darshan")
 summary = profile.GetSummary()
 ```
 
+```python
+#Application Timeline of data operations
+tl = profile.CreateIOTimeline()
+plt.figure(figsize=(20,4))
+plt.grid()
+plt.plot(tl['time_step'], tl['operation_count']);
+
+```
+
 ## Installation
 
 ## Getting Started
@@ -37,6 +46,6 @@ summary = profile.GetSummary()
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTA1ODQ2Mzk0NSwtMTQyODQyNzIwMiwxMD
-k3MzcyNTk4LDI1NjQ5MjI5NCwxODQ5MTg0NTI0XX0=
+eyJoaXN0b3J5IjpbLTEzMzMwMjYxMDUsLTE0Mjg0MjcyMDIsMT
+A5NzM3MjU5OCwyNTY0OTIyOTQsMTg0OTE4NDUyNF19
 -->
