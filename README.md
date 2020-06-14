@@ -28,7 +28,6 @@ plt.figure(figsize=(20,4))
 plt.grid()
 plt.plot(tl['time_step'], tl['operation_count']);
 ```
-![Operation Timeline](https://photos.google.com/photo/AF1QipOmVKyS0kaUE6oSW5-YoUNtXw9V6w-MOgUW9ATb)
 
 ## Installation
 
@@ -46,7 +45,7 @@ plt.plot(tl['time_step'], tl['operation_count']);
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyNjIzNDg1OTMsLTEzMzMwMjYxMDUsLT
+eyJoaXN0b3J5IjpbLTIwMzU3MjIwNTksLTEzMzMwMjYxMDUsLT
 E0Mjg0MjcyMDIsMTA5NzM3MjU5OCwyNTY0OTIyOTQsMTg0OTE4
 NDUyNF19
 -->
