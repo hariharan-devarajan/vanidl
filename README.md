@@ -60,7 +60,7 @@ python setup.py install
 module load VaniDL
 ```
 ## Getting Started
-See _[Getting Started with VaniDL](http://vanidl.github.io/getting_started)_ to learn about VaniDL basic functionalities or start browsing _[TFLearn Tutorials](http://tflearn.org/tutorials)_.
+See _[Getting Started with VaniDL](http://vanidl.github.io/getting_started)_ to learn about VaniDL basic functionalities or start browsing _[TFLearn Tutorials](http://vanidl.github.io/tutorials)_.
 
 ### Examples
 
@@ -74,7 +74,7 @@ See _[Getting Started with VaniDL](http://vanidl.github.io/getting_started)_ to 
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTY0MzU2MDk4MSwtMTMyMTg5NDY3OSwtMT
-MzMzAyNjEwNSwtMTQyODQyNzIwMiwxMDk3MzcyNTk4LDI1NjQ5
-MjI5NCwxODQ5MTg0NTI0XX0=
+eyJoaXN0b3J5IjpbLTEzOTU2MzEwMjIsLTEzMjE4OTQ2NzksLT
+EzMzMwMjYxMDUsLTE0Mjg0MjcyMDIsMTA5NzM3MjU5OCwyNTY0
+OTIyOTQsMTg0OTE4NDUyNF19
 -->
