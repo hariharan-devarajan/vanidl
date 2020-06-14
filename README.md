@@ -38,6 +38,23 @@ More examples are [here](https://github.com/hariharan-devarajan/dlprofiler/tree/
 - h5py==2.10.0
 - tensorflow~=2.2.0
 
+**VaniDL Installation**
+
+To install VaniDL, the easiest way is to run
+
+For the bleeding edge version (recommended):
+
+```bash
+pip install git+https://github.com/hariharan-devarajan/dlprofiler.git
+```
+For the latest stable version:
+
+pip install tflearn
+
+Otherwise, you can also install from source by running (from source folder):
+
+python setup.py install
+
 ### On Theta
 ```bash
 module load VaniDL
@@ -57,7 +74,7 @@ module load VaniDL
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEzMjE4OTQ2NzksLTEzMzMwMjYxMDUsLT
-E0Mjg0MjcyMDIsMTA5NzM3MjU5OCwyNTY0OTIyOTQsMTg0OTE4
-NDUyNF19
+eyJoaXN0b3J5IjpbNjE2MzI1NDA1LC0xMzIxODk0Njc5LC0xMz
+MzMDI2MTA1LC0xNDI4NDI3MjAyLDEwOTczNzI1OTgsMjU2NDky
+Mjk0LDE4NDkxODQ1MjRdfQ==
 -->
