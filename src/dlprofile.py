@@ -878,9 +878,7 @@ class DLProfile(object):
             raise SystemExit(str(ErrorCodes.EC1009))
         file_ext_array = os.path.splitext(ntpath.basename(filepath))
         filename = file_ext_array[0]
-        file_ext = filepath.split('.')[-1]
-        if file_ext == filename or file_ext != 'tfrecord':
-            raise Exception(str(ErrorCodes.EC1007))
+        file_ext = 'tfrecord' 
         filenames = [filepath]
         raw_dataset = tf.data.TFRecordDataset(filenames)
         if len(features) == 0:
