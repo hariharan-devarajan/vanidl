@@ -1,4 +1,4 @@
-# dlpDLProfiler
+# Deep Learning Profiler
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTg0OTE4NDUyNF19
+eyJoaXN0b3J5IjpbMzQ2NzUzNzUyLDE4NDkxODQ1MjRdfQ==
 -->
