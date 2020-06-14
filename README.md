@@ -12,6 +12,9 @@ VaniDL is an tool for analyzing I/O patterns and behavior with Deep Learning App
  
 
 ## Overview
+```python
+#Load darshan file
+```
 
 ## Installation
 
@@ -29,6 +32,6 @@ VaniDL is an tool for analyzing I/O patterns and behavior with Deep Learning App
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTE3NDY1MjkwNiwtMTQyODQyNzIwMiwxMD
+eyJoaXN0b3J5IjpbMTIyNjg4MDQ2OCwtMTQyODQyNzIwMiwxMD
 k3MzcyNTk4LDI1NjQ5MjI5NCwxODQ5MTg0NTI0XX0=
 -->
