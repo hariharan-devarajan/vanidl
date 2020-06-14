@@ -48,19 +48,19 @@ For the bleeding edge version (recommended):
 pip install git+https://github.com/hariharan-devarajan/dlprofiler.git
 ```
 For the latest stable version:
-
-pip install tflearn
-
+```bash
+pip install vanidl
+```
 Otherwise, you can also install from source by running (from source folder):
-
+```bash
 python setup.py install
-
+```
 ### On Theta
 ```bash
 module load VaniDL
 ```
-
 ## Getting Started
+See _[Getting Started with VaniDL](http://vanidl.github.io/getting_started)_ to learn about VaniDL basic functionalities or start browsing _[TFLearn Tutorials](http://tflearn.org/tutorials)_.
 
 ### Examples
 
@@ -74,7 +74,7 @@ module load VaniDL
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNjE2MzI1NDA1LC0xMzIxODk0Njc5LC0xMz
-MzMDI2MTA1LC0xNDI4NDI3MjAyLDEwOTczNzI1OTgsMjU2NDky
-Mjk0LDE4NDkxODQ1MjRdfQ==
+eyJoaXN0b3J5IjpbMTY0MzU2MDk4MSwtMTMyMTg5NDY3OSwtMT
+MzMzAyNjEwNSwtMTQyODQyNzIwMiwxMDk3MzcyNTk4LDI1NjQ5
+MjI5NCwxODQ5MTg0NTI0XX0=
 -->
