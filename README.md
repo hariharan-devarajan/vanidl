@@ -6,8 +6,8 @@ VaniDL is an tool for analyzing I/O patterns and behavior with Deep Learning App
 
 -   Easy-to-use and understand high-level API for extracting I/O behavior of the applications.
 -   Fast prototyping through highly modular data representation through pandas for easy plotting of graphs.
--   Full transparency over profiling data with access to intern
--   Powerful helper functions to train any TensorFlow graph, with support of multiple inputs, outputs and optimizers.
+-   Full transparency over profiling data with access to internal data structures such as timeline of applications, aggregation functions, and drill up/down data views.
+-   Powerful helper functions to build a visual understanding of how applications perform I/O such as request distributions, file access pattern, and ex
 -   Easy and beautiful graph visualization, with details about weights, gradients, activations and more...
 -   Effortless device placement for using multiple CPU/GPU.
 
@@ -31,6 +31,6 @@ VaniDL is an tool for analyzing I/O patterns and behavior with Deep Learning App
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTc5OTQ0NTQ5NywtMTQyODQyNzIwMiwxMD
+eyJoaXN0b3J5IjpbMTYwMTUwMjEyMiwtMTQyODQyNzIwMiwxMD
 k3MzcyNTk4LDI1NjQ5MjI5NCwxODQ5MTg0NTI0XX0=
 -->
