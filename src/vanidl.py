@@ -609,9 +609,9 @@ class VaniDL(object):
                        temp_df['MPIIO_F_WRITE_TIME'].sum() + \
                        temp_df['MPIIO_F_META_TIME'].sum()
             if "STDIO" in temp_df['Module'].unique():
-                val += temp_df['STDIO_META_TIME'].sum() + \
-                       temp_df['STDIO_WRITE_TIME'].sum() + \
-                       temp_df['STDIO_READ_TIME'].sum()
+                val += temp_df['STDIO_F_META_TIME'].sum() + \
+                       temp_df['STDIO_F_WRITE_TIME'].sum() + \
+                       temp_df['STDIO_F_READ_TIME'].sum()
             if "H5D" in temp_df['Module'].unique():
                 val += temp_df['H5D_F_READ_TIME'].sum() + \
                        temp_df['H5D_F_WRITE_TIME'].sum() + \
