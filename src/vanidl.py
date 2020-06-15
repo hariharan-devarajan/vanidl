@@ -349,6 +349,8 @@ class VaniDL(object):
         :param: data_paths_include: paths to include
         """
         # make Filename categorical
+        self._df = self._df.convert_dtypes()
+        self._dxt_df = self._dxt_df.convert_dtypes()
         self._dxt_df["Filename"] = self._dxt_df["Filename"].astype('category')
         self._df["Filename"] = self._df["Filename"].astype('category')
         # Compute I/O time
