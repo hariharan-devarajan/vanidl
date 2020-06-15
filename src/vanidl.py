@@ -372,9 +372,9 @@ class VaniDL(object):
         if "STDIO" in self._df['Module'].unique():
             self._df = self._df.astype({'STDIO_BYTES_READ': 'int64',
                                         'STDIO_BYTES_WRITTEN': 'int64',
-                                        'STDIO_READ_TIME': 'float64',
-                                        'STDIO_WRITE_TIME': 'float64',
-                                        'STDIO_META_TIME': 'float64'
+                                        'STDIO_F_READ_TIME': 'float64',
+                                        'STDIO_F_WRITE_TIME': 'float64',
+                                        'STDIO_F_META_TIME': 'float64'
                                         }, errors='ignore')
         if "H5D" in self._df['Module'].unique():
             self._df = self._df.astype({'H5D_BYTES_READ': 'int64',
