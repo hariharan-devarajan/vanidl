@@ -713,21 +713,16 @@ class VaniDL(object):
         """
         self._throw_if_not_loaded()
         if filepath is not None:
-            if not os.path.exists(filepath):
-                print("file not found {}".format(filepath))
-                raise SystemExit(str(ErrorCodes.EC1009))
-            file = self._file_access_pattern[filepath]
-            size = pathlib.Path(filepath).stat().st_size
-            return {filepath: size}
+            if os.path.exists(filepath):
+                size = pathlib.Path(filepath).stat().st_size
+                return {filepath: size}
         else:
             file_size_map = {}
             for file in self._file_access_pattern:
-                if not os.path.exists(file):
-                    print("file not found {}".format(file))
-                    raise SystemExit(str(ErrorCodes.EC1009).format(file))
-                size = pathlib.Path(file).stat().st_size
-                file = os.path.splitext(ntpath.basename(file))[0]
-                file_size_map[file] = float(size)
+                if os.path.exists(file):
+                    size = pathlib.Path(file).stat().st_size
+                    file = os.path.splitext(ntpath.basename(file))[0]
+                    file_size_map[file] = float(size)
             return file_size_map
 
     def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True, is_print=True):
