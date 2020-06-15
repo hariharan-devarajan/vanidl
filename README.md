@@ -28,7 +28,7 @@ plt.figure(figsize=(20,4))
 plt.grid()
 plt.plot(tl['time_step'], tl['operation_count']);
 ```
-![timeline](./IMG_0097.jpg)
+![timeline](./images/IMG_0097.jpg)
 
 More examples are [here](https://github.com/hariharan-devarajan/vanidl/wiki/examples)
 
@@ -77,6 +77,6 @@ For more info:  _[Contribute to VaniDL](https://github.com/hariharan-devarajan/v
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbODUyNjU0MjMzLDQxMjYwNjc0NiwtMTUyNz
-MwMDUxNV19
+eyJoaXN0b3J5IjpbLTE2MjI1MTEwMzAsODUyNjU0MjMzLDQxMj
+YwNjc0NiwtMTUyNzMwMDUxNV19
 -->
