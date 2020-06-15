@@ -10,7 +10,7 @@ setuptools.setup(
     description="I/O analyzer of Scientific Deep Learning applications.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/hariharan-devarajan/dlprofiler",
+    url="https://github.com/hariharan-devarajan/vandl",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
