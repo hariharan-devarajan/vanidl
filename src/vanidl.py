@@ -349,8 +349,36 @@ class VaniDL(object):
         :param: data_paths_include: paths to include
         """
         # make Filename categorical
-        self._df = self._df.convert_dtypes()
-        self._dxt_df = self._dxt_df.convert_dtypes()
+        self._df = self._df.astype({'POSIX_READS': 'int64',
+                                    'POSIX_SEQ_READS': 'int64',
+                                    'POSIX_CONSEC_READS': 'int64',
+                                    'POSIX_WRITES': 'int64',
+                                    'POSIX_SEQ_WRITES': 'int64',
+                                    'POSIX_CONSEC_WRITES': 'int64',
+                                    'POSIX_BYTES_WRITTEN': 'int64',
+                                    'POSIX_BYTES_READ': 'int64',
+                                    'POSIX_F_WRITE_TIME': 'int64',
+                                    'POSIX_F_READ_TIME': 'int64',
+                                    'POSIX_F_META_TIME': 'int64',
+
+                                    'MPIIO_BYTES_READ': 'int64',
+                                    'MPIIO_BYTES_WRITTEN': 'int64',
+                                    'MPIIO_F_READ_TIME': 'int64',
+                                    'MPIIO_F_WRITE_TIME': 'int64',
+                                    'MPIIO_F_META_TIME': 'int64',
+
+                                    'STDIO_BYTES_READ': 'int64',
+                                    'STDIO_BYTES_WRITTEN': 'int64',
+                                    'STDIO_READ_TIME': 'int64',
+                                    'STDIO_WRITE_TIME': 'int64',
+                                    'STDIO_META_TIME': 'int64',
+
+                                    'H5D_BYTES_READ': 'int64',
+                                    'H5D_BYTES_WRITTEN': 'int64',
+                                    'H5D_F_READ_TIME': 'int64',
+                                    'H5D_F_WRITE_TIME': 'int64',
+                                    'H5D_F_META_TIME': 'int64',
+                                    })
         self._dxt_df["Filename"] = self._dxt_df["Filename"].astype('category')
         self._df["Filename"] = self._df["Filename"].astype('category')
         # Compute I/O time
