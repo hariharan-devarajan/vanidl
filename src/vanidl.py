@@ -377,7 +377,7 @@ class VaniDL(object):
                                     'H5D_BYTES_WRITTEN': 'int64',
                                     'H5D_F_READ_TIME': 'int64',
                                     'H5D_F_WRITE_TIME': 'int64',
-                                    'H5D_F_META_TIME': 'int64',
+                                    'H5D_F_META_TIME': 'int64'
                                     })
         self._dxt_df["Filename"] = self._dxt_df["Filename"].astype('category')
         self._df["Filename"] = self._df["Filename"].astype('category')
