@@ -647,7 +647,7 @@ class DLProfile(object):
             io_time_array.append(self.GetIOTime(rank=rank))
         return numpy.array(io_time_array)
 
-    def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True):
+    def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True, is_print=True):
         """
         Create a timeline for I/O where per timestep, we calculate number of operations and amount of I/O.
         if filepath is set, data is further filtered by filepath
@@ -672,7 +672,8 @@ class DLProfile(object):
         tm_df_filename = "{}.csv".format(tm_df_filename)
         if os.path.exists(tm_df_filename):
             df_time = pd.read_csv(tm_df_filename)
-            print("Loaded Pre-processed Timeline from file: {}".format(tm_df_filename))
+            if is_print:
+                print("Loaded Pre-processed Timeline from file: {}".format(tm_df_filename))
             return df_time
         min_time = round(0, 3)
         max_time = round(self.GetJobTime(), 3)
