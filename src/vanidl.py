@@ -570,15 +570,15 @@ class VaniDL(object):
                 val += temp_df['POSIX_F_READ_TIME'].sum() + \
                        temp_df['POSIX_F_WRITE_TIME'].sum() + \
                        temp_df['POSIX_F_META_TIME'].sum()
-            elif "MPIIO" in temp_df['Module'].unique():
+            if "MPIIO" in temp_df['Module'].unique():
                 val += temp_df['MPIIO_F_READ_TIME'].sum() + \
                        temp_df['MPIIO_F_WRITE_TIME'].sum() + \
                        temp_df['MPIIO_F_META_TIME'].sum()
-            elif "STDIO" in temp_df['Module'].unique():
+            if "STDIO" in temp_df['Module'].unique():
                 val += temp_df['STDIO_META_TIME'].sum() + \
                        temp_df['STDIO_WRITE_TIME'].sum() + \
                        temp_df['STDIO_READ_TIME'].sum()
-            elif "H5D" in temp_df['Module'].unique():
+            if "H5D" in temp_df['Module'].unique():
                 val += temp_df['H5D_F_READ_TIME'].sum() + \
                        temp_df['H5D_F_WRITE_TIME'].sum() + \
                        temp_df['H5D_F_META_TIME'].sum()
@@ -609,13 +609,13 @@ class VaniDL(object):
             if "POSIX" in temp_df['Module'].unique():
                 val += temp_df['POSIX_BYTES_WRITTEN'].sum() + \
                        temp_df['POSIX_BYTES_READ'].sum()
-            elif "MPIIO" in temp_df['Module'].unique():
+            if "MPIIO" in temp_df['Module'].unique():
                 val += temp_df['MPIIO_BYTES_READ'].sum() + \
                        temp_df['MPIIO_BYTES_WRITTEN'].sum()
-            elif "STDIO" in temp_df['Module'].unique():
+            if "STDIO" in temp_df['Module'].unique():
                 val += temp_df['STDIO_BYTES_WRITTEN'].sum() + \
                        temp_df['STDIO_BYTES_READ'].sum()
-            elif "H5D" in temp_df['Module'].unique():
+            if "H5D" in temp_df['Module'].unique():
                 val += temp_df['H5D_BYTES_READ'].sum() + \
                        temp_df['H5D_BYTES_WRITTEN'].sum()
             return val
@@ -856,13 +856,13 @@ class VaniDL(object):
             if "POSIX" in self._df['Module'].unique():
                 write += self._df['POSIX_BYTES_WRITTEN'].sum()
                 read += self._df['POSIX_BYTES_READ'].sum()
-            elif "MPIIO" in self._df['Module'].unique():
+            if "MPIIO" in self._df['Module'].unique():
                 write += self._df['MPIIO_BYTES_WRITTEN'].sum()
                 read += self._df['MPIIO_BYTES_READ'].sum()
-            elif "STDIO" in self._df['Module'].unique():
+            if "STDIO" in self._df['Module'].unique():
                 write += self._df['STDIO_BYTES_WRITTEN'].sum()
                 read += self._df['STDIO_BYTES_READ'].sum()
-            elif "H5D" in self._df['Module'].unique():
+            if "H5D" in self._df['Module'].unique():
                 write += self._df['H5D_BYTES_WRITTEN'].sum()
                 read += self._df['H5D_BYTES_READ'].sum()
             if write > 0:
