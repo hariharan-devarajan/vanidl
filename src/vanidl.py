@@ -349,6 +349,7 @@ class VaniDL(object):
         :param: data_paths_include: paths to include
         """
         # make Filename categorical
+        self._df = self._df.fillna('0')
         if "POSIX" in self._df['Module'].unique():
             self._df = self._df.astype({'POSIX_READS': 'int64',
                                         'POSIX_SEQ_READS': 'int64',
