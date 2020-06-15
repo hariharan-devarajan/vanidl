@@ -442,8 +442,8 @@ class VaniDL(object):
                                                      "write": [0, 0, 0],
                                                      "io_bytes": int(row['STDIO_BYTES_READ']) +
                                                                  int(row['STDIO_BYTES_WRITTEN']),
-                                                     "io_time": float(row['STDIO_READ_TIME']) +
-                                                                float(row['STDIO_WRITE_TIME'])}
+                                                     "io_time": float(row['STDIO_F_READ_TIME']) +
+                                                                float(row['STDIO_F_WRITE_TIME'])}
             elif row['Module'] == "H5D":
                 pattern_file_map[row['Filename']] = {"name": file,
                                                      "read": [0, 0, 0],
@@ -849,7 +849,7 @@ class VaniDL(object):
             return {
                 "type": "full",
                 "job_time": self.GetJobTime(),
-                "total_io_time": self.GetIOTime()/float(self._dxt_df["Rank"].nunique()),
+                "total_io_time": self.GetIOTime(),
                 "total_io_bytes": self.GetIOSize(),
                 "io_interface_used": self._dxt_df['Module'].unique(),
                 "io_operations_used": self._dxt_df['Operation'].unique(),
