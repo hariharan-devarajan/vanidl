@@ -25,14 +25,14 @@ import pathlib
 """
 Local Includes
 """
-from src.dlprofile import DLProfile
+from src.vanidl import VaniDL
 from src.constants import *
 import tensorflow as tf
 
 
 def LoadEnv():
     os.environ[DARSHAN_DIR] = "/home/hdevarajan/software/install"
-    os.environ[DLPROFILE_DIR] = "/home/hdevarajan/dlprofile"
+    os.environ[VANIDL_DIR] = "/home/hdevarajan/dlprofile"
 
 
 FILE_PATH = "/projects/datascience/dhari/datasets/cosmic_tagger/cosmic_tagging_train.h5"
@@ -45,13 +45,13 @@ TIMESTEP_SEC = 1
 class MyTestCase(unittest.TestCase):
     def test_Load(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         self.assertEqual(status, True)
 
     def test_GetDXTAsDF(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.GetDXTAsDF()
         print(df['Filename'].unique()[1])
@@ -59,105 +59,105 @@ class MyTestCase(unittest.TestCase):
 
     def test_GetJobTime(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         job_time = profile.GetJobTime()
         self.assertNotEqual(job_time, 0)
 
     def test_GetIOTime(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_time = profile.GetIOTime()
         self.assertNotEqual(io_time, 0)
 
     def test_GetIOTimeFilepath(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_time = profile.GetIOTime(filepath=FILE_PATH)
         self.assertNotEqual(io_time, 0)
 
     def test_GetIOTimeRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_time = profile.GetIOTime(rank=RANK)
         self.assertNotEqual(io_time, 0)
 
     def test_GetIOTimeFilepathAndRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_time = profile.GetIOTime(filepath=FILE_PATH, rank=RANK)
         self.assertNotEqual(io_time, 0)
 
     def test_GetIOSize(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_size = profile.GetIOSize()
         self.assertNotEqual(io_size, 0)
 
     def test_GetIOSizeFilepath(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_size = profile.GetIOSize(filepath=FILE_PATH)
         self.assertNotEqual(io_size, 0)
 
     def test_GetIOSizeRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_size = profile.GetIOSize(rank=RANK)
         self.assertNotEqual(io_size, 0)
 
     def test_GetIOSizeFilepathAndRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_size = profile.GetIOSize(filepath=FILE_PATH, rank=RANK)
         self.assertNotEqual(io_size, 0)
 
     def test_GetAccessPattern(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         pattern = profile.GetAccessPattern()
         self.assertNotEqual(len(pattern), 0)
 
     def test_GetAccessPatternFilepath(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         pattern = profile.GetAccessPattern(filepath=FILE_PATH)
         self.assertNotEqual(len(pattern), 0)
 
     def test_GetFileSizes(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         file_sizes = profile.GetFileSizes()
         self.assertNotEqual(len(file_sizes), 0)
 
     def test_GetFileSizesFilepath(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         file_sizes = profile.GetFileSizes(filepath=FILE_PATH)
         self.assertNotEqual(len(file_sizes), 0)
 
     def test_GetIOPerRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         io_sizes = profile.GetIOPerRank()
         self.assertNotEqual(len(io_sizes), 0)
 
     def test_CreateIOTimeline(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.CreateIOTimeline()
         print(df.count()['time_step'])
@@ -165,35 +165,35 @@ class MyTestCase(unittest.TestCase):
 
     def test_CreateIOTimelineFilepath(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.CreateIOTimeline(filepath=FILE_PATH)
         self.assertNotEqual(df.count()['time_step'], 0)
 
     def test_CreateIOTimelineRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.CreateIOTimeline(rank=RANK)
         self.assertNotEqual(df.count()['time_step'], 0)
 
     def test_CreateIOTimelineTimestep(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.CreateIOTimeline(time_step=TIMESTEP_SEC)
         self.assertNotEqual(df.count()['time_step'], 0)
 
     def test_CreateIOTimelineFilepathRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.CreateIOTimeline(filepath=FILE_PATH, rank=RANK)
         self.assertNotEqual(df.count()['time_step'], 0)
 
     def test_GetIORequestDistribution(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.GetIORequestDistribution()
         print(df)
@@ -201,42 +201,42 @@ class MyTestCase(unittest.TestCase):
 
     def test_GetIORequestDistributionFilepath(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.GetIORequestDistribution(filepath=FILE_PATH)
         self.assertNotEqual(df.count(), 0)
 
     def test_GetIORequestDistributionRank(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         df = profile.GetIORequestDistribution(rank=RANK)
         self.assertNotEqual(df.count(), 0)
 
     def test_GetSummary(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         summary = profile.GetSummary()
         self.assertNotEqual(len(summary), 0)
 
     def test_GetFileSummaryHDF5WithExt(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         summary = profile.GetFileSummary(FILE_PATH,ext='h5')
         self.assertNotEqual(len(summary), 0)
 
     def test_GetFileSummaryHDF5(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         summary = profile.GetFileSummary(FILE_PATH)
         self.assertNotEqual(len(summary), 0)
 
     def test_GetFileSummaryTFRecord(self):
         LoadEnv()
-        profile = DLProfile()
+        profile = VaniDL()
         status = profile.Load("./test.darshan", data_paths_include=DATAPATH_INCLUDES)
         summary = profile.GetFileSummary(TF_FILE_PATH, ext="tfrecord", tf_record_features={
               'image/encoded': tf.io.FixedLenFeature((), dtype=tf.string, default_value=''),

@@ -16,6 +16,6 @@
 Constants used within the profiler
 """
 DARSHAN_DIR = 'DARSHAN_DIR'
-DLPROFILE_DIR = 'DLPROFILE_DIR'
+VANIDL_DIR = 'VANIDL_DIR'
 AUTO = -1
 UNKNOWN = ""

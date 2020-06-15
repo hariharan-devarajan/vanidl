@@ -38,3 +38,4 @@ class ErrorCodes:
     EC1007 = {1007, "ERROR:{} TFRecord not passed. If file is TFRecord use ext='tfrecord' argument"}
     EC1008 = {1008, "ERROR:{} Features are required for TF dataset"}
     EC1009 = {1009, "ERROR:{} filepath does not exists."}
+    EC1010 = {1010, "ERROR:{} DXT data not found. Cannot perform filter."}
