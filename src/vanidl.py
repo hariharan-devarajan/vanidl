@@ -853,6 +853,8 @@ class VaniDL(object):
         file_sizes = []
         for key in file_size_map:
             file_sizes.append(file_size_map[key])
+        if len(file_sizes) == 0:
+            file_sizes.append(0)
         file_sizes = numpy.array(file_sizes)
         if self._dxt_df.count()['Module'] != 0:
             return {
@@ -920,7 +922,7 @@ class VaniDL(object):
                 "total_io_bytes": self.GetIOSize(),
                 "io_interface_used": self._df['Module'].unique(),
                 "io_operations_used": operations,
-                "files_used": len(self._df["Filename"].unique().tolist()),
+                "files_used": self._df["Filename"].unique().tolist(),
                 "access_pattern": {
                     "total_operations": total_ops,
                     "sequential": float(total_seq) * 100.0 / total_ops,
