@@ -134,9 +134,6 @@ class VaniDL(object):
     GetFileSizes(filepath=None)
         Get map of sizes of the files accessed by the job
 
-    GetIOPerRank()
-        Get the total I/O time per rank in an array
-
     CreateIOTimeline(filepath=None, rank=None, time_step=None)
         Create a timeline of execution with timesteps, number of operations, and total I/O performed in bytes
 
@@ -164,7 +161,6 @@ class VaniDL(object):
         self._darshan_file = None
         self._errors = []
         self._darshan_bin_dir = None
-        self._vanidl_bin_path = None
         self._dxt_df = None
         self._df = None
         self._file_access_pattern = None
@@ -195,15 +191,10 @@ class VaniDL(object):
         """
         dxt_file = os.path.exists(self._darshan_file)
         darshan_path = True
-        vanidl_bin_path = True
         if DARSHAN_DIR not in os.environ:
             darshan_path = False
         else:
             darshan_path = os.path.exists("{}/bin".format(os.environ[DARSHAN_DIR]))
-        if VANIDL_DIR not in os.environ:
-            vanidl_bin_path = False
-        else:
-            VaniDL_bin_path = os.path.exists("{}/bin".format(os.environ[VANIDL_DIR]))
         is_valid = True
         if not dxt_file:
             self._errors.append(str(ErrorCodes.EC1002))
@@ -211,12 +202,8 @@ class VaniDL(object):
         if not darshan_path:
             self._errors.append(str(ErrorCodes.EC1003))
             is_valid = False
-        if not vanidl_bin_path:
-            self._errors.append(str(ErrorCodes.EC1004))
-            is_valid = False
         if is_valid:
             self._darshan_bin_dir = "{}/bin".format(os.environ[DARSHAN_DIR])
-            self._vanidl_bin_path = "{}/bin".format(os.environ[VANIDL_DIR])
         return is_valid
 
     def _check_loaded(self):
@@ -714,16 +701,14 @@ class VaniDL(object):
         """
         self._throw_if_not_loaded()
         if filepath is not None:
-            if os.path.exists(filepath):
-                size = pathlib.Path(filepath).stat().st_size
-                return {filepath: size}
+            size = pathlib.Path(filepath).stat().st_size
+            return {filepath: size}
         else:
             file_size_map = {}
             for file in self._file_access_pattern:
-                if os.path.exists(file):
-                    size = pathlib.Path(file).stat().st_size
-                    file = os.path.splitext(ntpath.basename(file))[0]
-                    file_size_map[file] = float(size)
+                size = pathlib.Path(file).stat().st_size
+                file = os.path.splitext(ntpath.basename(file))[0]
+                file_size_map[file] = float(size)
             return file_size_map
 
     def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True, is_print=True):
