@@ -1,6 +1,6 @@
 # VaniDL
 
-VaniDL is an tool for analyzing I/O patterns and behavior with Deep Learning Applications. It analyzes Darshan Extended traces to extract various I/O patterns with Deep Learning applications. The tool at it core uses dlprofiler which converts Darshan Profiler’s trace into knowledge for analysis. It is designed to provide low-level I/O behavior details to tensorflow applications in HPC. 
+VaniDL is an tool for analyzing I/O patterns and behavior with Deep Learning Applications. It analyzes Darshan Extended traces to extract various I/O patterns with Deep Learning applications. The tool at it core uses vanidl which converts Darshan Profiler’s trace into knowledge for analysis. It is designed to provide low-level I/O behavior details to tensorflow applications in HPC. 
 
 **VaniDL features include:**
 
@@ -28,6 +28,8 @@ plt.figure(figsize=(20,4))
 plt.grid()
 plt.plot(tl['time_step'], tl['operation_count']);
 ```
+![timeline](./images/IMG_0097.jpg)
+
 More examples are [here](https://github.com/hariharan-devarajan/vanidl/wiki/examples)
 
 ## Installation
@@ -75,5 +77,6 @@ For more info:  _[Contribute to VaniDL](https://github.com/hariharan-devarajan/v
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE1MjczMDA1MTVdfQ==
+eyJoaXN0b3J5IjpbLTE2MjI1MTEwMzAsODUyNjU0MjMzLDQxMj
+YwNjc0NiwtMTUyNzMwMDUxNV19
 -->

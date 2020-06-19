@@ -750,7 +750,11 @@ class VaniDL(object):
         data_points = math.ceil((max_time - min_time) / time_step)
         data_points_series = numpy.arange(0, data_points, 1)
         count_series = numpy.zeros(data_points)
+        read_series = numpy.zeros(data_points)
+        read_bytes_series = numpy.zeros(data_points)
         sum_series = numpy.zeros(data_points)
+        write_series = numpy.zeros(data_points)
+        write_bytes_series = numpy.zeros(data_points)
         pb_total = temp_df.count()['Module'];
         i = 1
         for index, row in temp_df.iterrows():
@@ -761,15 +765,21 @@ class VaniDL(object):
             end_index = math.ceil(float(row['End']) / time_step)
             # print(row['Start'],row['End'],start_index,end_index)
             for n in numpy.arange(start_index, end_index, 1):
+                if row['Operation'] == "read":
+                    read_series[n] += 1
+                    read_bytes_series[n] += float(row['Length'])
+                elif row['Operation'] == "write":
+                    write_series[n] += 1
+                    write_bytes_series[n] += float(row['Length'])
                 count_series[n] += 1
                 sum_series[n] += float(row['Length'])
         df_time = pd.DataFrame(
-            {'time_step': data_points_series, 'operation_count': count_series, 'io_bytes': sum_series})
+            {'time_step': data_points_series, 'operation_count': count_series, 'io_bytes': sum_series, 'read_bytes':read_bytes_series, 'read_count':read_series, 'write_bytes':write_bytes_series, 'write_count':write_series})
         if save:
             df_time.to_csv(index=False, path_or_buf=tm_df_filename)
         return df_time
 
-    def GetIORequestDistribution(self, filepath=None, rank=None, bins=100, threshold=AUTO):
+    def GetIORequestDistribution(self, filepath=None, rank=None, operation=None , bins=100, threshold=AUTO):
         """
         Returns a 2d series of value counts for given bins of io sizes.
         if filepath is passed, data is filtered by filename
@@ -778,6 +788,7 @@ class VaniDL(object):
         By default threshold is set to 1/1000 of the total sum of counts.
         :param filepath: filters the data by filepath
         :param rank: filters the data by rank
+        :param operation: filters the data by operation
         :param bins: sets the bins for the histogram
         :param threshold: sets the threshold to ignore on histogram
         :return: a dataframe object which can be plotted using plot function.
@@ -790,6 +801,8 @@ class VaniDL(object):
             temp_df = temp_df[temp_df['Filename'].eq(filepath)]
         if rank is not None:
             temp_df = temp_df[temp_df['Rank'].eq(rank)]
+        if operation is not None:
+            temp_df = temp_df[temp_df['Operation'].eq(operation)]
         counts = temp_df['Length'].value_counts(bins=bins)
         if threshold is AUTO:
             threshold = temp_df['Length'].count() * .001
@@ -825,6 +838,8 @@ class VaniDL(object):
         file_sizes = []
         for key in file_size_map:
             file_sizes.append(file_size_map[key])
+        if len(file_sizes) == 0:
+            file_sizes.append(0)
         file_sizes = numpy.array(file_sizes)
         if self._dxt_df.count()['Module'] != 0:
             return {
@@ -892,7 +907,7 @@ class VaniDL(object):
                 "total_io_bytes": self.GetIOSize(),
                 "io_interface_used": self._df['Module'].unique(),
                 "io_operations_used": operations,
-                "files_used": len(self._df["Filename"].unique().tolist()),
+                "files_used": self._df["Filename"].unique().tolist(),
                 "access_pattern": {
                     "total_operations": total_ops,
                     "sequential": float(total_seq) * 100.0 / total_ops,
