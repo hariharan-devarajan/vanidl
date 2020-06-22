@@ -12,6 +12,7 @@
 /.idea/sshConfigs.xml
 /.idea/webServers.xml
 /.idea/workspace.xml
+/.idea/*
 /.vscode/*
 /src/__pycache__*
 /tests/__pycache__*
