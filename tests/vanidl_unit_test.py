@@ -29,8 +29,8 @@ from src.vanidl import VaniDL
 from src.constants import *
 import tensorflow as tf
 
-DARSHAN_DIR_PATH = "/home/hdevarajan/software/install"
-VANIDL_DIR_PATH = "/home/hdevarajan/dlprofile"
+DARSHAN_DIR_PATH = "/workspace/software/install"
+VANIDL_DIR_PATH = "/workspace/vanidl"
 
 ORIGINAL_DATASET_DIR = "/projects/datascience/dhari/datasets/cosmic_tagger"
 TARGET_DATASET_DIR = "{}/tests".format(VANIDL_DIR_PATH)
@@ -271,6 +271,14 @@ class MyTestCase(unittest.TestCase):
         status = profile.Load(DARSHAN_FILE, data_paths_include=DATAPATH_INCLUDES, preprocessed_dir=PROCESSED_DIR)
         profile = rectify_paths(profile)
         summary = profile.GetFileSummary(FILE_PATH)
+        self.assertNotEqual(len(summary), 0)
+
+    def test_CreateChromeTimeline(self):
+        LoadEnv()
+        profile = VaniDL()
+        status = profile.Load(DARSHAN_FILE, data_paths_include=DATAPATH_INCLUDES, preprocessed_dir=PROCESSED_DIR)
+        profile = rectify_paths(profile)
+        summary = profile.CreateChromeTimeline(location=PROCESSED_DIR, filename="timeline.json")
         self.assertNotEqual(len(summary), 0)
 
 
