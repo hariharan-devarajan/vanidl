@@ -665,9 +665,10 @@ class VaniDL(object):
         else:
             file_size_map = {}
             for file in self._file_access_pattern:
-                size = pathlib.Path(file).stat().st_size
-                file = os.path.splitext(ntpath.basename(file))[0]
-                file_size_map[file] = float(size)
+                if os.path.exists(file):
+                    size = pathlib.Path(file).stat().st_size
+                    file = os.path.splitext(ntpath.basename(file))[0]
+                    file_size_map[file] = float(size)
             return file_size_map
 
     def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True, is_print=True):
