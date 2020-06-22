@@ -109,48 +109,6 @@ def progress(count, total, status=''):
 class VaniDL(object):
     """
     VaniDL is a Deep Learning profiling tool.
-
-    Methods
-    -------
-    load(darshan_file=None, preprocessed_dir="./temp_analysis", data_paths_include=[])
-        Loads the tool with the respective darshan file and processes the trace to load various structures for
-        VaniDL tool.
-
-    GetDXTAsDF()
-        Returns the processed DXT Trace as a Pandas Dataframe.
-
-    GetJobTime()
-        Get the total execution time of the job
-
-    GetIOTime(filepath=None, rank=None)
-        Get the total time spent on I/O in the job
-
-    GetIOSize(filepath=None, rank=None)
-        Get the total I/O performed by the job in bytes
-
-    GetAccessPattern(filepath=None)
-        Get I/O access pattern per file within the job
-
-    GetFileSizes(filepath=None)
-        Get map of sizes of the files accessed by the job
-
-    CreateIOTimeline(filepath=None, rank=None, time_step=None)
-        Create a timeline of execution with timesteps, number of operations, and total I/O performed in bytes
-
-    GetIORequestDistribution(self, filepath=None, rank=None, bins=100, threshold=AUTO)
-        Get a histogram of request sizes overall or per-file or per-rank (if passed).
-
-    GetSummary()
-        Get a dictionary of summary results from the VaniDLr.
-
-    GetHDF5FileSummary(filepath, only_special_summary=False)
-        Get a summary of HDF5 File
-
-    GetTFRecordSummary(filepath, features, only_special_summary=False)
-        Get a summary of TFRecord File
-
-    GetFileSummary(self, filepath, ext=UNKNOWN, tf_record_features=[])
-        Get a summary of File
     """
 
     def __init__(self):
@@ -1089,3 +1047,58 @@ class VaniDL(object):
             "io_size": self.GetIOSize(filepath=filepath),
             "special": special_summary
         }
+
+    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json"):
+        self._throw_if_not_loaded()
+        if self._dxt_df.count()['Module'] == 0:
+            raise Exception(str(ErrorCodes.EC1010))
+        chromeTimeline = {
+            "traceEvents": [],
+            "displayTimeUnit": "ms",
+            "systemTraceEvents": "SystemTraceData",
+            "otherData": {
+                "version": "VaniDL v1.0"
+            },
+            "stackFrames": {},
+            "samples": []
+        }
+        timestamps = []
+        data = []
+        #'Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End'
+        for index, row in self._dxt_df.iterrows():
+            event_start =   {"name": row['Filename'], "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
+                                "args": {
+                                    "Module":row['Module'],
+                                    "Filename": row['Filename'],
+                                    "Rank": row['Rank'],
+                                    "Operation": row['Operation'],
+                                    "Segment": row['Segment'],
+                                    "Offset": row['Offset'],
+                                    "Length": row['Length'],
+                                    "Start": row['Start'],
+                                    "End": row['End']
+                                }
+                            }
+            event_end =     {"ph": "E", "ts": int(float(row['End'])*1e6), "pid": int(row['Rank']), "tid": 0,
+                                "args": {
+                                    "Module":row['Module'],
+                                    "Filename": row['Filename'],
+                                    "Rank": row['Rank'],
+                                    "Operation": row['Operation'],
+                                    "Segment": row['Segment'],
+                                    "Offset": row['Offset'],
+                                    "Length": row['Length'],
+                                    "Start": row['Start'],
+                                    "End": row['End']
+                                }
+                            }
+
+            timestamps.append(int(float(row['Start'])*1e6))
+            data.append(event_start)
+            timestamps.append(int(float(row['End'])*1e6))
+            data.append(event_end)
+        sorted_data = [x for _,x in sorted(zip(timestamps,data))]
+        chromeTimeline["traceEvents"] = sorted_data
+        with open("{}/{}".format(location,filename), 'w') as outfile:
+            json.dump(data, outfile)
+        return chromeTimeline
