@@ -384,22 +384,22 @@ class VaniDL(object):
                                         'H5D_F_WRITE_TIME': 'float64',
                                         'H5D_F_META_TIME': 'float64'
                                         }, errors='ignore')
-        self._dxt_df["Filename"] = self._dxt_df["Filename"].astype('category')
+        self._dxt_df["io_time"] = 0
+        self._dxt_df["bandwidth"] = 0
+        self._dxt_df["ext"] = 0
+        if self._dxt_df['Module'].count() > 0:
+            self._dxt_df["Filename"] = self._dxt_df["Filename"].astype('category')
+            self._dxt_df['io_time'] = self._dxt_df['End'] - self._dxt_df['Start']
+            self._dxt_df.loc[self._dxt_df['io_time'] == 0, 'io_time'] = 0.001
+            self._dxt_df['bandwidth'] = self._dxt_df['Length'] / self._dxt_df['io_time']
+            self._dxt_df['ext'] = self._dxt_df.Filename.apply(lambda x: x.split('.')[-1])
+            self._dxt_df.loc[self._dxt_df['Filename'].str.contains("\.") == False, 'ext'] = ""
+            self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains("py")]
+        
         self._df["Filename"] = self._df["Filename"].astype('category')
-        # Compute I/O time
-        self._dxt_df['io_time'] = self._dxt_df['End'] - self._dxt_df['Start']
-        # Default erroneous io_time
-        self._dxt_df.loc[self._dxt_df['io_time'] == 0, 'io_time'] = 0.001
-        # Compute I/O Bandwidth
-        self._dxt_df['bandwidth'] = self._dxt_df['Length'] / self._dxt_df['io_time']
-        # Compute ext
-        self._dxt_df['ext'] = self._dxt_df.Filename.apply(lambda x: x.split('.')[-1])
         self._df['ext'] = self._df.Filename.apply(lambda x: x.split('.')[-1])
-        # If no extension then use blank
-        self._dxt_df.loc[self._dxt_df['Filename'].str.contains("\.") == False, 'ext'] = ""
         self._df.loc[self._df['Filename'].str.contains("\.") == False, 'ext'] = ""
         # remove .py files
-        self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains("py")]
         self._df = self._df[~self._df['Filename'].str.contains("py")]
         if len(data_paths_include) > 0:
             # print(len(data_paths_include))
@@ -597,27 +597,28 @@ class VaniDL(object):
         """
         self._throw_if_not_loaded()
         temp_df = self._df
-        if filepath is not None and rank is None:
-            temp_df = temp_df[temp_df['Filename'].eq(filepath)]
-        if rank is None:
-            val = 0
-            if "POSIX" in temp_df['Module'].unique():
-                val += temp_df['POSIX_F_READ_TIME'].sum() + \
-                       temp_df['POSIX_F_WRITE_TIME'].sum() + \
-                       temp_df['POSIX_F_META_TIME'].sum()
-            if "MPIIO" in temp_df['Module'].unique():
-                val += temp_df['MPIIO_F_READ_TIME'].sum() + \
-                       temp_df['MPIIO_F_WRITE_TIME'].sum() + \
-                       temp_df['MPIIO_F_META_TIME'].sum()
-            if "STDIO" in temp_df['Module'].unique():
-                val += temp_df['STDIO_F_META_TIME'].sum() + \
-                       temp_df['STDIO_F_WRITE_TIME'].sum() + \
-                       temp_df['STDIO_F_READ_TIME'].sum()
-            if "H5D" in temp_df['Module'].unique():
-                val += temp_df['H5D_F_READ_TIME'].sum() + \
-                       temp_df['H5D_F_WRITE_TIME'].sum() + \
-                       temp_df['H5D_F_META_TIME'].sum()
-            return val
+        if self._dxt_df.count()['Module'] == 0:
+            if filepath is not None and rank is None:
+                temp_df = temp_df[temp_df['Filename'].eq(filepath)]
+            if rank is None:
+                val = 0
+                if "POSIX" in temp_df['Module'].unique():
+                    val += temp_df['POSIX_F_READ_TIME'].sum() + \
+                           temp_df['POSIX_F_WRITE_TIME'].sum() + \
+                           temp_df['POSIX_F_META_TIME'].sum()
+                if "MPIIO" in temp_df['Module'].unique():
+                    val += temp_df['MPIIO_F_READ_TIME'].sum() + \
+                           temp_df['MPIIO_F_WRITE_TIME'].sum() + \
+                           temp_df['MPIIO_F_META_TIME'].sum()
+                if "STDIO" in temp_df['Module'].unique():
+                    val += temp_df['STDIO_F_META_TIME'].sum() + \
+                           temp_df['STDIO_F_WRITE_TIME'].sum() + \
+                           temp_df['STDIO_F_READ_TIME'].sum()
+                if "H5D" in temp_df['Module'].unique():
+                    val += temp_df['H5D_F_READ_TIME'].sum() + \
+                           temp_df['H5D_F_WRITE_TIME'].sum() + \
+                           temp_df['H5D_F_META_TIME'].sum()
+                return val
         if self._dxt_df.count()['Module'] == 0:
             raise Exception(str(ErrorCodes.EC1010))
         temp_df = self._dxt_df
@@ -625,7 +626,7 @@ class VaniDL(object):
             temp_df = temp_df[temp_df['Filename'].eq(filepath)]
         if rank is not None:
             temp_df = temp_df[temp_df['Rank'].eq(rank)]
-        return temp_df['io_time'].sum()
+        return temp_df['io_time'].sum()/temp_df['Rank'].nunique()
 
     def GetIOSize(self, filepath=None, rank=None):
         """
