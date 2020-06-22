@@ -109,51 +109,6 @@ def progress(count, total, status=''):
 class VaniDL(object):
     """
     VaniDL is a Deep Learning profiling tool.
-
-    Methods
-    -------
-    load(darshan_file=None, preprocessed_dir="./temp_analysis", data_paths_include=[])
-        Loads the tool with the respective darshan file and processes the trace to load various structures for
-        VaniDL tool.
-
-    GetDXTAsDF()
-        Returns the processed DXT Trace as a Pandas Dataframe.
-
-    GetJobTime()
-        Get the total execution time of the job
-
-    GetIOTime(filepath=None, rank=None)
-        Get the total time spent on I/O in the job
-
-    GetIOSize(filepath=None, rank=None)
-        Get the total I/O performed by the job in bytes
-
-    GetAccessPattern(filepath=None)
-        Get I/O access pattern per file within the job
-
-    GetFileSizes(filepath=None)
-        Get map of sizes of the files accessed by the job
-
-    GetIOPerRank()
-        Get the total I/O time per rank in an array
-
-    CreateIOTimeline(filepath=None, rank=None, time_step=None)
-        Create a timeline of execution with timesteps, number of operations, and total I/O performed in bytes
-
-    GetIORequestDistribution(self, filepath=None, rank=None, bins=100, threshold=AUTO)
-        Get a histogram of request sizes overall or per-file or per-rank (if passed).
-
-    GetSummary()
-        Get a dictionary of summary results from the VaniDLr.
-
-    GetHDF5FileSummary(filepath, only_special_summary=False)
-        Get a summary of HDF5 File
-
-    GetTFRecordSummary(filepath, features, only_special_summary=False)
-        Get a summary of TFRecord File
-
-    GetFileSummary(self, filepath, ext=UNKNOWN, tf_record_features=[])
-        Get a summary of File
     """
 
     def __init__(self):
@@ -164,7 +119,6 @@ class VaniDL(object):
         self._darshan_file = None
         self._errors = []
         self._darshan_bin_dir = None
-        self._vanidl_bin_path = None
         self._dxt_df = None
         self._df = None
         self._file_access_pattern = None
@@ -195,15 +149,10 @@ class VaniDL(object):
         """
         dxt_file = os.path.exists(self._darshan_file)
         darshan_path = True
-        vanidl_bin_path = True
         if DARSHAN_DIR not in os.environ:
             darshan_path = False
         else:
             darshan_path = os.path.exists("{}/bin".format(os.environ[DARSHAN_DIR]))
-        if VANIDL_DIR not in os.environ:
-            vanidl_bin_path = False
-        else:
-            VaniDL_bin_path = os.path.exists("{}/bin".format(os.environ[VANIDL_DIR]))
         is_valid = True
         if not dxt_file:
             self._errors.append(str(ErrorCodes.EC1002))
@@ -211,12 +160,8 @@ class VaniDL(object):
         if not darshan_path:
             self._errors.append(str(ErrorCodes.EC1003))
             is_valid = False
-        if not vanidl_bin_path:
-            self._errors.append(str(ErrorCodes.EC1004))
-            is_valid = False
         if is_valid:
             self._darshan_bin_dir = "{}/bin".format(os.environ[DARSHAN_DIR])
-            self._vanidl_bin_path = "{}/bin".format(os.environ[VANIDL_DIR])
         return is_valid
 
     def _check_loaded(self):
@@ -715,16 +660,14 @@ class VaniDL(object):
         """
         self._throw_if_not_loaded()
         if filepath is not None:
-            if os.path.exists(filepath):
-                size = pathlib.Path(filepath).stat().st_size
-                return {filepath: size}
+            size = pathlib.Path(filepath).stat().st_size
+            return {filepath: size}
         else:
             file_size_map = {}
             for file in self._file_access_pattern:
-                if os.path.exists(file):
-                    size = pathlib.Path(file).stat().st_size
-                    file = os.path.splitext(ntpath.basename(file))[0]
-                    file_size_map[file] = float(size)
+                size = pathlib.Path(file).stat().st_size
+                file = os.path.splitext(ntpath.basename(file))[0]
+                file_size_map[file] = float(size)
             return file_size_map
 
     def CreateIOTimeline(self, filepath=None, rank=None, time_step=None, save=True, is_print=True):
@@ -1105,3 +1048,63 @@ class VaniDL(object):
             "io_size": self.GetIOSize(filepath=filepath),
             "special": special_summary
         }
+
+    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json"):
+        self._throw_if_not_loaded()
+        if self._dxt_df.count()['Module'] == 0:
+            raise Exception(str(ErrorCodes.EC1010))
+        chromeTimeline = {
+            "traceEvents": [],
+            "displayTimeUnit": "ms",
+            "systemTraceEvents": "SystemTraceData",
+            "otherData": {
+                "version": "VaniDL v1.0"
+            },
+            "stackFrames": {},
+            "samples": []
+        }
+        timestamps = []
+        data = []
+        #'Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End'
+        pb_total = self._dxt_df.count()['Module'];
+        i = 1        
+        for index, row in self._dxt_df.iterrows():
+            if i % 100 == 0 or i == pb_total:
+                progress(i, pb_total, status='Creating Timeline')
+            i += 1
+            event_start =   {"name": row['Filename'], "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
+                                "args": {
+                                    "Module":row['Module'],
+                                    "Filename": row['Filename'],
+                                    "Rank": row['Rank'],
+                                    "Operation": row['Operation'],
+                                    "Segment": row['Segment'],
+                                    "Offset": row['Offset'],
+                                    "Length": row['Length'],
+                                    "Start": row['Start'],
+                                    "End": row['End']
+                                }
+                            }
+            event_end =     {"ph": "E", "ts": int(float(row['End'])*1e6), "pid": int(row['Rank']), "tid": 0,
+                                "args": {
+                                    "Module":row['Module'],
+                                    "Filename": row['Filename'],
+                                    "Rank": row['Rank'],
+                                    "Operation": row['Operation'],
+                                    "Segment": row['Segment'],
+                                    "Offset": row['Offset'],
+                                    "Length": row['Length'],
+                                    "Start": row['Start'],
+                                    "End": row['End']
+                                }
+                            }
+
+            timestamps.append(int(float(row['Start'])*1e6))
+            data.append(event_start)
+            timestamps.append(int(float(row['End'])*1e6))
+            data.append(event_end)
+        data.sort(key=lambda x: x['ts'])
+        chromeTimeline["traceEvents"] = data
+        with open("{}/{}".format(location,filename), 'w') as outfile:
+            json.dump(chromeTimeline, outfile)
+        return chromeTimeline
