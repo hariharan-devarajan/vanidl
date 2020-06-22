@@ -29,8 +29,8 @@ from src.vanidl import VaniDL
 from src.constants import *
 import tensorflow as tf
 
-DARSHAN_DIR_PATH = "/workspace/software/install"
-VANIDL_DIR_PATH = "/workspace/vanidl"
+DARSHAN_DIR_PATH = "/home/hariharan/install"
+VANIDL_DIR_PATH = "/home/hariharan/PycharmProjects/vanidl"
 
 ORIGINAL_DATASET_DIR = "/projects/datascience/dhari/datasets/cosmic_tagger"
 TARGET_DATASET_DIR = "{}/tests".format(VANIDL_DIR_PATH)
