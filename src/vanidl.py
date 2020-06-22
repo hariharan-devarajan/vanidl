@@ -1065,7 +1065,12 @@ class VaniDL(object):
         timestamps = []
         data = []
         #'Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End'
+        pb_total = self._dxt_df.count()['Module'];
+        i = 1        
         for index, row in self._dxt_df.iterrows():
+            if i % 100 == 0 or i == pb_total:
+                progress(i, pb_total, status='Creating Timeline')
+            i += 1
             event_start =   {"name": row['Filename'], "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
                                 "args": {
                                     "Module":row['Module'],
@@ -1097,8 +1102,8 @@ class VaniDL(object):
             data.append(event_start)
             timestamps.append(int(float(row['End'])*1e6))
             data.append(event_end)
-        sorted_data = [x for _,x in sorted(zip(timestamps,data))]
-        chromeTimeline["traceEvents"] = sorted_data
+        data.sort(key=lambda x: x['ts'])
+        chromeTimeline["traceEvents"] = data
         with open("{}/{}".format(location,filename), 'w') as outfile:
-            json.dump(data, outfile)
+            json.dump(chromeTimeline, outfile)
         return chromeTimeline
