@@ -10,6 +10,8 @@ import numpy
 import pathlib
 import math
 import json
+import glob
+import gzip
 
 """
 Pip Packages
@@ -1050,7 +1052,7 @@ class VaniDL(object):
             "special": special_summary
         }
 
-    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json"):
+    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json",save = True):
         self._throw_if_not_loaded()
         if self._dxt_df.count()['Module'] == 0:
             raise Exception(str(ErrorCodes.EC1010))
@@ -1106,9 +1108,58 @@ class VaniDL(object):
             data.append(event_end)
         data.sort(key=lambda x: x['ts'])
         chromeTimeline["traceEvents"] = data
-        with open("{}/{}".format(location,filename), 'w') as outfile:
-            json.dump(chromeTimeline, outfile)
+        if save:
+            with open("{}/{}".format(location,filename), 'w') as outfile:
+                json.dump(chromeTimeline, outfile)
         return chromeTimeline
+
+    def UpdateProcessAndHostInformation(self, tensorboard_dir, merged_timeline_file, save=True):
+        if tensorboard_dir == None or merged_timeline_file == None:
+            raise Exception(str(ErrorCodes.EC1011))
+        if not os.path.exists(tensorboard_dir):
+            raise Exception(str(ErrorCodes.EC10112))
+        fileExt = "*.trace.json.gz"
+        posix_path_files = list(pathlib.Path(tensorboard_dir).rglob(fileExt))
+        files = []
+        for path in posix_path_files:
+            files.append(str(path))
+        hosts = {}
+        for file in files:
+            # with open(file) as json_file:
+            with gzip.open(file, 'rb') as json_file:
+                data = json.load(json_file)
+            trace_events = list(data["traceEvents"])
+            filename = os.path.basename(file)
+            hostname = filename.split(".")[0]
+            if hostname not in hosts:
+                hosts[hostname] = {}
+            for trace_event in trace_events:
+                if 'pid' in trace_event and trace_event['pid'] not in hosts[hostname]:
+                    hosts[hostname][trace_event['pid']] = {'rank': 0, 'threads': set()}
+                if 'pid' in trace_event and 'tid' in trace_event and trace_event['tid'] not in \
+                        hosts[hostname][trace_event['pid']]['threads']:
+                    hosts[hostname][trace_event['pid']]['threads'].add(trace_event['tid'])
+        rank = 0
+        for hostname in sorted(hosts.keys()):
+            for pid in sorted(hosts[hostname].keys()):
+                hosts[hostname][pid]['rank'] = rank
+                rank += 1
+        base_json = self.CreateChromeTimeline(save=False)
+        for file in files:
+            with gzip.open(file, 'rb') as json_file:
+                data = json.load(json_file)
+            trace_events = list(data["traceEvents"])
+            filename = os.path.basename(file)
+            hostname = filename.split(".")[0]
+            for trace_event in trace_events:
+                if 'pid' in trace_event:
+                    trace_event['pid'] = hosts[hostname][trace_event['pid']]['rank']
+            base_json["traceEvents"].extend(trace_events)
+        base_json["traceEvents"].sort(key=lambda x: x['ts'])
+        if save:
+            with open(merged_timeline_file, 'w') as outfile:
+                json.dump(base_json, outfile)
+        return base_json
 
     def MergeTimelines(self, timeline_file1, timeline_file2, merged_timeline_file):
         if timeline_file1 == None or timeline_file2 == None or merged_timeline_file == None:
