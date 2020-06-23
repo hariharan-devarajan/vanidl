@@ -16,3 +16,7 @@
 /.vscode/*
 /src/__pycache__*
 /tests/__pycache__*
+/tests/merged_trace.json
+/tests/io_timeline.json
+/tests/compute_trace.json
+/tests/temp_analysis/

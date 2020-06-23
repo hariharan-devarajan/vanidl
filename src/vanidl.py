@@ -1,17 +1,3 @@
-"""
- Copyright (C) 2020  Argonne, Hariharan Devarajan <hdevarajan@anl.gov>
- This file is part of VaniDL
- HFetch is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
- published by the Free Software Foundation, either version 3 of the published by the Free Software Foundation, either
- version 3 of the License, or (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- details.
-
- You should have received a copy of the GNU General Public License along with this program.
- If not, see <http://www.gnu.org/licenses/>.
-"""
 
 """
 System Includes
@@ -43,6 +29,20 @@ from src.configuraton import *
 Global Methods
 """
 
+"""
+ Copyright (C) 2020  Argonne, Hariharan Devarajan <hdevarajan@anl.gov>
+ This file is part of VaniDL
+ HFetch is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation, either version 3 of the published by the Free Software Foundation, either
+ version 3 of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU General Public License along with this program.
+ If not, see <http://www.gnu.org/licenses/>.
+"""
 
 def _exec_cmd(command):
     """
@@ -1109,3 +1109,21 @@ class VaniDL(object):
         with open("{}/{}".format(location,filename), 'w') as outfile:
             json.dump(chromeTimeline, outfile)
         return chromeTimeline
+
+    def MergeTimelines(self, timeline_file1, timeline_file2, merged_timeline_file):
+        if timeline_file1 == None or timeline_file2 == None or merged_timeline_file == None:
+            raise Exception(str(ErrorCodes.EC1011))
+        if not os.path.exists(timeline_file1) or not os.path.exists(timeline_file2):
+            raise Exception(str(ErrorCodes.EC10112))
+        file_1_json = {}
+        with open(timeline_file1) as f:
+            file_1_json = json.load(f)
+        file_2_json = {}
+        with open(timeline_file2) as f:
+            file_2_json = json.load(f)
+        new_trace_values = file_1_json["traceEvents"]
+        new_trace_values.extend(file_2_json["traceEvents"])
+        file_1_json["traceEvents"]=new_trace_values
+        with open(merged_timeline_file, 'w') as outfile:
+            json.dump(file_1_json, outfile)
+        return file_1_json

@@ -281,6 +281,11 @@ class MyTestCase(unittest.TestCase):
         summary = profile.CreateChromeTimeline(location=PROCESSED_DIR, filename="timeline.json")
         self.assertNotEqual(len(summary), 0)
 
+    def test_MergeTimelines(self):
+        LoadEnv()
+        profile = VaniDL()
+        merged_trace = profile.MergeTimelines(timeline_file1="./compute_trace.json",timeline_file2="./io_timeline.json", merged_timeline_file="./merged_trace.json")
+        self.assertNotEqual(len(merged_trace), 0)
 
 if __name__ == '__main__':
     unittest.main()

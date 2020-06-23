@@ -39,3 +39,5 @@ class ErrorCodes:
     EC1008 = {1008, "ERROR:{} Features are required for TF dataset"}
     EC1009 = {1009, "ERROR:{} filepath does not exists."}
     EC1010 = {1010, "ERROR:{} DXT data not found. Cannot perform filter."}
+    EC1011 = {1011, "ERROR:{} Timeline file not passed."}
+    EC1012 = {1012, "ERROR:{} Source timeline file do not exists."}
