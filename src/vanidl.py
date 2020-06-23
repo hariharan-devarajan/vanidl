@@ -1154,6 +1154,8 @@ class VaniDL(object):
             for trace_event in trace_events:
                 if 'pid' in trace_event:
                     trace_event['pid'] = hosts[hostname][trace_event['pid']]['rank']
+                if 'ts' not in trace_event:
+                    trace_event['ts'] = 0
             base_json["traceEvents"].extend(trace_events)
         base_json["traceEvents"].sort(key=lambda x: x['ts'])
         if save:
