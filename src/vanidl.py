@@ -1113,10 +1113,10 @@ class VaniDL(object):
                 json.dump(chromeTimeline, outfile)
         return chromeTimeline
 
-    def UpdateProcessAndHostInformation(self, tensorboard_dir, merged_timeline_file, save=True):
-        if tensorboard_dir == None or merged_timeline_file == None:
+    def CreateMergedTimeline(self, tensorboard_dir, merged_timeline_output_dir, merged_timeline_file_prefix, save=True):
+        if tensorboard_dir == None or merged_timeline_file_prefix == None or merged_timeline_output_dir == None:
             raise Exception(str(ErrorCodes.EC1011))
-        if not os.path.exists(tensorboard_dir):
+        if not os.path.exists(tensorboard_dir) or not os.path.exists(merged_timeline_output_dir):
             raise Exception(str(ErrorCodes.EC10112))
         fileExt = "*.trace.json.gz"
         posix_path_files = list(pathlib.Path(tensorboard_dir).rglob(fileExt))
@@ -1145,23 +1145,39 @@ class VaniDL(object):
                 hosts[hostname][pid]['rank'] = rank
                 rank += 1
         base_json = self.CreateChromeTimeline(save=False)
+        b_base_json = base_json
+        print("merging")
+        trace_data_proc = [None] * 8
+        trace_events = list(b_base_json["traceEvents"])
+        for trace_event in trace_events:
+            if 'pid' in trace_event:
+                pid = trace_event['pid']
+                if trace_data_proc[pid] == None:
+                    trace_data_proc[pid] = []
+                trace_data_proc[pid].append(trace_event)
         for file in files:
             with gzip.open(file, 'rb') as json_file:
                 data = json.load(json_file)
             trace_events = list(data["traceEvents"])
             filename = os.path.basename(file)
             hostname = filename.split(".")[0]
+            final_traces = []
             for trace_event in trace_events:
                 if 'pid' in trace_event:
                     trace_event['pid'] = hosts[hostname][trace_event['pid']]['rank']
-                if 'ts' not in trace_event:
-                    trace_event['ts'] = 0
-            base_json["traceEvents"].extend(trace_events)
-        base_json["traceEvents"].sort(key=lambda x: x['ts'])
-        if save:
-            with open(merged_timeline_file, 'w') as outfile:
-                json.dump(base_json, outfile)
-        return base_json
+                    pid = trace_event['pid']
+                    if trace_data_proc[pid] == None:
+                        trace_data_proc[pid] = []
+                    trace_data_proc[pid].append(trace_event)
+        for i, trace_data in enumerate(trace_data_proc):
+            b_base_json = base_json
+            b_base_json["traceEvents"] = trace_data
+            json_file = "{}/{}_r{}.json.gz".format(merged_timeline_output_dir, merged_timeline_file_prefix, i)
+            json_str = json.dumps(b_base_json) + "\n"
+            json_bytes = json_str.encode('utf-8')
+            with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
+                fout.write(json_bytes)
+        return trace_data_proc
 
     def MergeTimelines(self, timeline_file1, timeline_file2, merged_timeline_file):
         if timeline_file1 == None or timeline_file2 == None or merged_timeline_file == None:
