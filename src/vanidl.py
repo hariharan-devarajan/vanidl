@@ -1075,7 +1075,7 @@ class VaniDL(object):
             if i % 100 == 0 or i == pb_total:
                 progress(i, pb_total, status='Creating Timeline')
             i += 1
-            event_start =   {"name": row['Filename'], "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
+            event_start =   {"name": "dxt", "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
                                 "args": {
                                     "Module":row['Module'],
                                     "Filename": row['Filename'],
