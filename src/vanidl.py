@@ -1124,7 +1124,11 @@ class VaniDL(object):
         for path in posix_path_files:
             files.append(str(path))
         hosts = {}
+        pb_total = len(files);
+        i = 1
         for file in files:
+            progress(i, pb_total, status='Parsing TF logs for hostname and Rank')
+            i += 1
             # with open(file) as json_file:
             with gzip.open(file, 'rb') as json_file:
                 data = json.load(json_file)
@@ -1155,7 +1159,11 @@ class VaniDL(object):
                 if trace_data_proc[pid] == None:
                     trace_data_proc[pid] = []
                 trace_data_proc[pid].append(trace_event)
+        pb_total = len(files);
+        i = 1
         for file in files:
+            progress(i, pb_total, status='Merging darshan with tf timeline')
+            i += 1
             with gzip.open(file, 'rb') as json_file:
                 data = json.load(json_file)
             trace_events = list(data["traceEvents"])
@@ -1180,13 +1188,17 @@ class VaniDL(object):
             json_file = "{}/{}_r{}.json.gz".format(merged_timeline_output_dir, merged_timeline_file_prefix, i)
             json_str = json.dumps(b_base_json) + "\n"
             json_bytes = json_str.encode('utf-8')
-            with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
-                fout.write(json_bytes)
+            if save:
+                with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
+                    fout.write(json_bytes)
+                print("written {}".format(json_file))
         json_file = "{}/{}.json.gz".format(merged_timeline_output_dir, merged_timeline_file_prefix)
         json_str = json.dumps(merged_timeline_json) + "\n"
         json_bytes = json_str.encode('utf-8')
-        with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
-            fout.write(json_bytes)
+        if save:
+            with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
+                fout.write(json_bytes)
+            print("written {}".format(json_file))
         return trace_data_proc
 
     def MergeTimelines(self, timeline_file1, timeline_file2, merged_timeline_file):
