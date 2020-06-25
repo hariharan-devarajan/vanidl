@@ -1109,8 +1109,10 @@ class VaniDL(object):
         data.sort(key=lambda x: x['ts'])
         chromeTimeline["traceEvents"] = data
         if save:
-            with open("{}/{}".format(location,filename), 'w') as outfile:
-                json.dump(chromeTimeline, outfile)
+            json_str = json.dumps(chromeTimeline) + "\n"
+            json_bytes = json_str.encode('utf-8')
+            with gzip.GzipFile("{}/{}.gz".format(location,filename), 'w') as fout:  # 4. gzip
+                fout.write(json_bytes)
         return chromeTimeline
 
     def CreateMergedTimeline(self, tensorboard_dir, merged_timeline_output_dir, merged_timeline_file_prefix, save=True):
