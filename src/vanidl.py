@@ -1167,9 +1167,9 @@ class VaniDL(object):
                                      "pid": rank, "tid": 1,
                                      "args": args_val
                                      }
-                        timestamps.append(int(float(row['Start']) * 1e6))
+                        timestamps.append(int(float(row['STDIO_F_READ_START_TIMESTAMP']) * 1e6))
                         data.append(event_start)
-                        timestamps.append(int(float(row['End']) * 1e6))
+                        timestamps.append(int(float(row['STDIO_F_READ_END_TIMESTAMP']) * 1e6))
                         data.append(event_end)
                     if row['STDIO_BYTES_WRITTEN'] != 0:
                         event_start = {"name": "darshan", "cat": row['Module'], "ph": "B",
@@ -1181,9 +1181,9 @@ class VaniDL(object):
                                      "pid": rank, "tid": 1,
                                      "args": args_val
                                      }
-                        timestamps.append(int(float(row['Start']) * 1e6))
+                        timestamps.append(int(float(row['STDIO_F_WRITE_START_TIMESTAMP']) * 1e6))
                         data.append(event_start)
-                        timestamps.append(int(float(row['End']) * 1e6))
+                        timestamps.append(int(float(row['STDIO_F_WRITE_END_TIMESTAMP']) * 1e6))
                         data.append(event_end)
         data.sort(key=lambda x: x['ts'])
         chromeTimeline["traceEvents"] = data
