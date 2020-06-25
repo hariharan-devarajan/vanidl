@@ -348,6 +348,8 @@ class VaniDL(object):
         self._df.loc[self._df['Filename'].str.contains("\.") == False, 'ext'] = ""
         # remove .py files
         self._df = self._df[~self._df['Filename'].str.contains("py")]
+        self._df = self._df[~self._df['Filename'].str.contains("<STDERR>")]
+        self._df = self._df[~self._df['Filename'].str.contains("<STDOUT>")]
         if len(data_paths_include) > 0:
             # print(len(data_paths_include))
             for data_path in data_paths_include:
