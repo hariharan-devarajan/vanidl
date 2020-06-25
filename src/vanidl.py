@@ -1070,11 +1070,13 @@ class VaniDL(object):
         data = []
         #'Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End'
         pb_total = self._dxt_df.count()['Module'];
-        i = 1        
+        i = 1
+        ranks_set = set()
         for index, row in self._dxt_df.iterrows():
             if i % 100 == 0 or i == pb_total:
-                progress(i, pb_total, status='Creating Timeline')
+                progress(i, pb_total, status='Creating DXT Timeline')
             i += 1
+            ranks_set.add(int(row['Rank']))
             event_start =   {"name": "dxt", "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
                                 "args": {
                                     "Module":row['Module'],
@@ -1106,6 +1108,81 @@ class VaniDL(object):
             data.append(event_start)
             timestamps.append(int(float(row['End'])*1e6))
             data.append(event_end)
+        pb_total = self._df.count()['Module'];
+        i = 1
+        for index, row in self._df.iterrows():
+            if i % 100 == 0 or i == pb_total:
+                progress(i, pb_total, status='Creating DXT Timeline')
+            i += 1
+            if row['Module'] == "STDIO":
+                args_val = {
+                    "Module": row['Module'],
+                    "Rank": row['Rank'],
+                    "Filename": row['Filename'],
+                    "STDIO_OPENS": row['STDIO_OPENS'],
+                    "STDIO_FDOPENS": row['STDIO_FDOPENS'],
+                    "STDIO_READS": row['STDIO_READS'],
+                    "STDIO_WRITES": row['STDIO_WRITES'],
+                    "STDIO_SEEKS": row['STDIO_SEEKS'],
+                    "STDIO_FLUSHES": row['STDIO_FLUSHES'],
+                    "STDIO_BYTES_WRITTEN": row['STDIO_BYTES_WRITTEN'],
+                    "STDIO_BYTES_READ": row['STDIO_BYTES_READ'],
+                    "STDIO_MAX_BYTE_READ": row['STDIO_MAX_BYTE_READ'],
+                    "STDIO_MAX_BYTE_WRITTEN": row['STDIO_MAX_BYTE_WRITTEN'],
+                    "STDIO_FASTEST_RANK": row['STDIO_FASTEST_RANK'],
+                    "STDIO_FASTEST_RANK_BYTES": row['STDIO_FASTEST_RANK_BYTES'],
+                    "STDIO_SLOWEST_RANK": row['STDIO_SLOWEST_RANK'],
+                    "STDIO_SLOWEST_RANK_BYTES": row['STDIO_SLOWEST_RANK_BYTES'],
+                    "STDIO_F_META_TIME": row['STDIO_F_META_TIME'],
+                    "STDIO_F_WRITE_TIME": row['STDIO_F_WRITE_TIME'],
+                    "STDIO_F_READ_TIME": row['STDIO_F_READ_TIME'],
+                    "STDIO_F_OPEN_START_TIMESTAMP": row['STDIO_F_OPEN_START_TIMESTAMP'],
+                    "STDIO_F_CLOSE_START_TIMESTAMP": row['STDIO_F_CLOSE_START_TIMESTAMP'],
+                    "STDIO_F_WRITE_START_TIMESTAMP": row['STDIO_F_WRITE_START_TIMESTAMP'],
+                    "STDIO_F_READ_START_TIMESTAMP": row['STDIO_F_READ_START_TIMESTAMP'],
+                    "STDIO_F_OPEN_END_TIMESTAMP": row['STDIO_F_OPEN_END_TIMESTAMP'],
+                    "STDIO_F_CLOSE_END_TIMESTAMP": row['STDIO_F_CLOSE_END_TIMESTAMP'],
+                    "STDIO_F_WRITE_END_TIMESTAMP": row['STDIO_F_WRITE_END_TIMESTAMP'],
+                    "STDIO_F_READ_END_TIMESTAMP": row['STDIO_F_READ_END_TIMESTAMP'],
+                    "STDIO_F_FASTEST_RANK_TIME": row['STDIO_F_FASTEST_RANK_TIME'],
+                    "STDIO_F_SLOWEST_RANK_TIME": row['STDIO_F_SLOWEST_RANK_TIME'],
+                    "STDIO_F_VARIANCE_RANK_TIME": row['STDIO_F_VARIANCE_RANK_TIME'],
+                    "STDIO_F_VARIANCE_RANK_BYTES": row['STDIO_F_VARIANCE_RANK_BYTES']
+                }
+                ranks = []
+                if row['Rank'] != -1:
+                    ranks.append(int(row['Rank']))
+                else:
+                    ranks.extend(list(ranks_set))
+                for rank in ranks:
+                    if row['STDIO_BYTES_READ'] != 0:
+                        event_start = {"name": "darshan", "cat": row['Module'], "ph": "B",
+                                       "ts": int(float(row['STDIO_F_READ_START_TIMESTAMP']) * 1e6),
+                                       "pid": rank, "tid": 1,
+                                       "args": args_val
+                                       }
+                        event_end = {"ph": "E", "ts": int(float(row['STDIO_F_READ_END_TIMESTAMP']) * 1e6),
+                                     "pid": rank, "tid": 1,
+                                     "args": args_val
+                                     }
+                        timestamps.append(int(float(row['Start']) * 1e6))
+                        data.append(event_start)
+                        timestamps.append(int(float(row['End']) * 1e6))
+                        data.append(event_end)
+                    if row['STDIO_BYTES_WRITTEN'] != 0:
+                        event_start = {"name": "darshan", "cat": row['Module'], "ph": "B",
+                                       "ts": int(float(row['STDIO_F_WRITE_START_TIMESTAMP']) * 1e6),
+                                       "pid": rank, "tid": 1,
+                                       "args": args_val
+                                       }
+                        event_end = {"ph": "E", "ts": int(float(row['STDIO_F_WRITE_END_TIMESTAMP']) * 1e6),
+                                     "pid": rank, "tid": 1,
+                                     "args": args_val
+                                     }
+                        timestamps.append(int(float(row['Start']) * 1e6))
+                        data.append(event_start)
+                        timestamps.append(int(float(row['End']) * 1e6))
+                        data.append(event_end)
         data.sort(key=lambda x: x['ts'])
         chromeTimeline["traceEvents"] = data
         if save:
