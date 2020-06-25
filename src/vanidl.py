@@ -1056,7 +1056,7 @@ class VaniDL(object):
 
     def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json",save = True):
         self._throw_if_not_loaded()
-        if self._dxt_df.count()['Module'] == 0:
+        if self._dxt_df.count()['Module'] == 0 and self._df.count()['Module'] == 0:
             raise Exception(str(ErrorCodes.EC1010))
         chromeTimeline = {
             "traceEvents": [],
