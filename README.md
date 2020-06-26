@@ -30,7 +30,7 @@ plt.plot(tl['time_step'], tl['operation_count']);
 ```
 ![timeline](./images/IMG_0097.jpg)
 
-More examples are [here](https://github.com/hariharan-devarajan/vanidl/wiki/examples)
+More examples are [here](https://github.com/hariharan-devarajan/vanidl/tree/master/examples)
 
 ## Installation
 
@@ -77,6 +77,7 @@ For more info:  _[Contribute to VaniDL](https://github.com/hariharan-devarajan/v
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTMyOTAyNzk2MCwtMTYyMjUxMTAzMCw4NT
-I2NTQyMzMsNDEyNjA2NzQ2LC0xNTI3MzAwNTE1XX0=
+eyJoaXN0b3J5IjpbMTU4NTg3NDgzMywxMzI5MDI3OTYwLC0xNj
+IyNTExMDMwLDg1MjY1NDIzMyw0MTI2MDY3NDYsLTE1MjczMDA1
+MTVdfQ==
 -->
