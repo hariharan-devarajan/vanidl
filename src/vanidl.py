@@ -1055,6 +1055,15 @@ class VaniDL(object):
         }
 
     def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json",save = True):
+        """
+        This functions build a timeline from the darshan traces to be analyzed using chrome://tracing
+        It puts the darshan dxt trace on thread id 0 and put the darshan normal trace on thread id 1.
+
+        :param location: folder where timeline should be stored
+        :param filename: filename of the timeline
+        :param save: if the timeline returned should be persisted
+        :return: the timeline returned in json format.
+        """
         self._throw_if_not_loaded()
         if self._dxt_df.count()['Module'] == 0 and self._df.count()['Module'] == 0:
             raise Exception(str(ErrorCodes.EC1010))
@@ -1079,7 +1088,7 @@ class VaniDL(object):
                 progress(i, pb_total, status='Creating DXT Timeline')
             i += 1
             ranks_set.add(int(row['Rank']))
-            event_start =   {"name": "dxt", "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
+            event_start =   {"name": row['Filename'], "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
                                 "args": {
                                     "Module":row['Module'],
                                     "Filename": row['Filename'],
@@ -1158,7 +1167,7 @@ class VaniDL(object):
                     ranks.extend(list(ranks_set))
                 for rank in ranks:
                     if row['STDIO_BYTES_READ'] != 0:
-                        event_start = {"name": "darshan", "cat": row['Module'], "ph": "B",
+                        event_start = {"name": row['Filename'], "cat": row['Module'], "ph": "B",
                                        "ts": int(float(row['STDIO_F_READ_START_TIMESTAMP']) * 1e6),
                                        "pid": rank, "tid": 1,
                                        "args": args_val
@@ -1195,6 +1204,16 @@ class VaniDL(object):
         return chromeTimeline
 
     def CreateMergedTimeline(self, tensorboard_dir, merged_timeline_output_dir, merged_timeline_file_prefix, save=True):
+        """
+        This method merges all tracing files from tensorboard_dir with the darshan traces.
+        It first converts hostnames and process id to ranks. (Assumption: hostname and pids are ordered by MPI
+        and then merges the darshan trace with tf logs.
+        :param tensorboard_dir: The log directory where tensorboard logs are present.
+        :param merged_timeline_output_dir: directory where merged timeline should be output.
+        :param merged_timeline_file_prefix: prefix for out files to be written.
+        :param save: if the timeline should be saved
+        :return: the generated timeline which is merged between darshan and td logs files.
+        """
         if tensorboard_dir == None or merged_timeline_file_prefix == None or merged_timeline_output_dir == None:
             raise Exception(str(ErrorCodes.EC1011))
         if not os.path.exists(tensorboard_dir) or not os.path.exists(merged_timeline_output_dir):
@@ -1282,6 +1301,13 @@ class VaniDL(object):
         return merged_timeline_json
 
     def MergeTimelines(self, timeline_file1, timeline_file2, merged_timeline_file):
+        """
+        This method merges two timeline files.
+        :param timeline_file1: The first timeline to which the second would be merged
+        :param timeline_file2: The timeline file which will be merged into the first
+        :param merged_timeline_file: The output file for the resultant merged timeline.
+        :return: The merged timeline.
+        """
         if timeline_file1 == None or timeline_file2 == None or merged_timeline_file == None:
             raise Exception(str(ErrorCodes.EC1011))
         if not os.path.exists(timeline_file1) or not os.path.exists(timeline_file2):
