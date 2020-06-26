@@ -62,7 +62,7 @@ python setup.py install
 module load VaniDL
 ```
 ## Getting Started
-See _[Getting Started with VaniDL](https://github.com/hariharan-devarajan/vanidl/wiki/getting_started)_ to learn about VaniDL basic functionalities or start browsing _[TFLearn Tutorials](https://github.com/hariharan-devarajan/vanidl/wiki/tutorials)_.
+See _[Getting Started with VaniDL](https://github.com/hariharan-devarajan/vanidl/wiki/Getting-Started)_ to learn about VaniDL basic functionalities or start browsing _[TFLearn APIs](https://github.com/hariharan-devarajan/vanidl/wiki/API)_.
 
 ### Examples
 There are many examples of analysis available, see _[Examples](https://github.com/hariharan-devarajan/vanidl/wiki/examples)_.
@@ -77,6 +77,6 @@ For more info:  _[Contribute to VaniDL](https://github.com/hariharan-devarajan/v
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE2MjI1MTEwMzAsODUyNjU0MjMzLDQxMj
-YwNjc0NiwtMTUyNzMwMDUxNV19
+eyJoaXN0b3J5IjpbMTQxOTI2MDEsLTE2MjI1MTEwMzAsODUyNj
+U0MjMzLDQxMjYwNjc0NiwtMTUyNzMwMDUxNV19
 -->
