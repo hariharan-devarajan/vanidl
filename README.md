@@ -65,7 +65,7 @@ module load VaniDL
 See _[Getting Started with VaniDL](https://github.com/hariharan-devarajan/vanidl/wiki/Getting-Started)_ to learn about VaniDL basic functionalities or start browsing _[TFLearn APIs](https://github.com/hariharan-devarajan/vanidl/wiki/API)_.
 
 ### Examples
-There are many examples of analysis available, see _[Examples](https://github.com/hariharan-devarajan/vanidl/wiki/examples)_.
+There are many examples of analysis available, see _[Examples](https://github.com/hariharan-devarajan/vanidl/tree/master/examples)_.
 
 ## Contributions
 This is the first release of VaniDL, if you find any bug, please report it in the GitHub issues section.
@@ -77,6 +77,6 @@ For more info:  _[Contribute to VaniDL](https://github.com/hariharan-devarajan/v
 
 MIT License
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTQxOTI2MDEsLTE2MjI1MTEwMzAsODUyNj
-U0MjMzLDQxMjYwNjc0NiwtMTUyNzMwMDUxNV19
+eyJoaXN0b3J5IjpbMTMyOTAyNzk2MCwtMTYyMjUxMTAzMCw4NT
+I2NTQyMzMsNDEyNjA2NzQ2LC0xNTI3MzAwNTE1XX0=
 -->
