@@ -118,7 +118,7 @@
 ### Darshan I/O Profiling Results
 
 - It spend 23% of total time of total time on I/O 
-    - All I/O performed  is on a training hdf5 file is predominantly **read** for reading images
+    - All I/O performed  is on a training hdf5 file is predominantly read for reading images
     - The hdf5 file is read by several ranks and hence I/O per file may be more than its file size.
     - File is always read sequentially and consequitively from start till required
     	- Each request reads a image based on the distribution of request, most reads are 28KB.
@@ -340,5 +340,5 @@
 	- \# of epochs in each step.
 	- checkpoint frequency in count of steps
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTA4NTY2MzUwNiwxMDgxNzk2OTIxXX0=
+eyJoaXN0b3J5IjpbMTg0NDA2MTk3MCwxMDgxNzk2OTIxXX0=
 -->
