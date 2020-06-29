@@ -311,7 +311,7 @@
 	- TFRecord and HDF5
 - Write checkpoint for every n steps:	1 operation of different file sizes (4 files) from 1KB, 4KB, 64KB, and 4MB
 ## I/O Access Pattern
-- MPI +OMP
+- MPI + OMP
 
 ## I/O Access Pattern
 - File Access
@@ -339,6 +339,6 @@
 	- \# of epochs in each step.
 	- checkpoint frequency in count of steps
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyMjk1NjI2LC0xMzUwNzMyMTY5LDQzND
-UyNzU0OSwxODQ0MDYxOTcwLDEwODE3OTY5MjFdfQ==
+eyJoaXN0b3J5IjpbLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksND
+M0NTI3NTQ5LDE4NDQwNjE5NzAsMTA4MTc5NjkyMV19
 -->
