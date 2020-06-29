@@ -19,6 +19,9 @@ Pip Packages
 import pandas as pd
 import h5py
 import tensorflow as tf
+# input_pipeline
+from tensorboard_plugin_profile.convert import input_pipeline_proto_to_gviz
+from tensorboard_plugin_profile.protobuf import input_pipeline_pb2
 
 """
 Local Includes
@@ -126,6 +129,7 @@ class VaniDL(object):
         self._file_access_pattern = None
         self._preprocessed_dir = None
         self._tf_features = None
+        self._tb_input_pipeline = None
         return
 
     """
@@ -450,12 +454,67 @@ class VaniDL(object):
             return dataset_map
         else:
             return None
+    def _parse_tb_logs(self, tensorflow_logs_dir):
+        fileExt = "*input_pipeline.pb"
+        input_pipeline_files = list(pathlib.Path(tensorflow_logs_dir).rglob(fileExt))
+        ipa_hosts = {}
+        for file in input_pipeline_files:
+            filename = os.path.basename(file)
+            hostname = filename.split(".")[0]
+            ipa_hosts[hostname] = {}
+            ipa_hosts[hostname]['log_file'] = str(file)
+        pb_total = len(ipa_hosts.keys())
+        i = 1
+        for key in ipa_hosts.keys():
+            if i % 100 == 0 or i == pb_total:
+                progress(i, pb_total, status='Reading TB IPA log file')
+            i += 1
+            ipa = input_pipeline_pb2.InputPipelineAnalysisResult()
+            f = open(ipa_hosts[key]['log_file'], "rb")
+            ipa.ParseFromString(f.read())
+            (table_description, data, custom_properties) = input_pipeline_proto_to_gviz.get_step_breakdown_table_args(
+                ipa)
+            # print(custom_properties)
+            # print(table_description)
+            ipa_hosts[key]['step_data'] = {}
+            ipa_hosts[key]['step_data']['data'] = []
+            ipa_hosts[key]['step_data']['custom_properties'] = custom_properties
+            for index, step_data_val in enumerate(data):
+                step_data = {}
+                # print(step_data_val)
+                step_data['stepnum'] = int(step_data_val[0])
+                step_data['deviceComputeTimeMs'] = float(step_data_val[1])
+                step_data['deviceToDeviceTimeMs'] = float(step_data_val[2])
+                step_data['hostComputeTimeMs'] = float(step_data_val[3])
+                step_data['kernelLaunchTimeMs'] = float(step_data_val[4])
+                step_data['infeedTimeMs'] = float(step_data_val[5])
+                step_data['hostComputeTimeMs'] = float(step_data_val[6])
+                step_data['outfeedTimeMs'] = float(step_data_val[7])
+                step_data['compileTimeMs'] = float(step_data_val[8])
+                ipa_hosts[key]['step_data']['data'].append(step_data)
+            (table_description, data, custom_properties) = input_pipeline_proto_to_gviz.get_input_op_table_args(ipa)
+            ipa_hosts[key]['op_data'] = {}
+            ipa_hosts[key]['op_data']['data'] = []
+            ipa_hosts[key]['op_data']['custom_properties'] = custom_properties
+            for index, op_data_val in enumerate(data):
+                op_data = {}
+                # print(step_data_val)
+                op_data['opName'] = op_data_val[0]
+                op_data['count'] = int(op_data_val[1])
+                op_data['timeInMs'] = float(op_data_val[2])
+                op_data['timeInPercent'] = float(op_data_val[3])
+                op_data['selfTimeInMs'] = float(op_data_val[4])
+                op_data['selfTimeInPercent'] = float(op_data_val[5])
+                op_data['category'] = op_data_val[6]
+                ipa_hosts[key]['op_data']['data'].append(op_data)
+        self._tb_input_pipeline = ipa_hosts
+        return self._tb_input_pipeline
 
     """
     Public Functions
     """
 
-    def Load(self, darshan_file, preprocessed_dir="/tmp/temp_analysis", data_paths_include=[]):
+    def Load(self, darshan_file, preprocessed_dir="/tmp/temp_analysis", data_paths_include=[], tensorflow_logs_dir=None):
         """
         This functions bootstraps the VaniDLr with the given darshan filename
 
@@ -503,6 +562,17 @@ class VaniDL(object):
             with open(pattern_json) as json_file:
                 self._file_access_pattern = json.load(json_file)
             print("Loaded Pre-processed Pattern file: {}".format(pattern_json))
+        if tensorflow_logs_dir is not None:
+            ipa_json = "{}/tb_ipa.json".format(self._preprocessed_dir)
+            if not os.path.exists(ipa_json):
+                self._tb_input_pipeline = self._parse_tb_logs(tensorflow_logs_dir)
+                with open(ipa_json, 'w') as outfile:
+                    json.dump(self._tb_input_pipeline, outfile)
+            else:
+                with open(ipa_json) as json_file:
+                    self._tb_input_pipeline = json.load(json_file)
+                print("Loaded Pre-processed Input Analyzer file: {}".format(ipa_json))
+
         self._errors = []
         self._loaded = True
         return True
@@ -1324,3 +1394,5 @@ class VaniDL(object):
         with open(merged_timeline_file, 'w') as outfile:
             json.dump(file_1_json, outfile)
         return file_1_json
+
+
