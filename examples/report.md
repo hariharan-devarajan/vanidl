@@ -75,7 +75,7 @@
     - The hdf5 file is read by several ranks and, hence, I/O per file may be more than its file size.
     - The application initially reads 50 operations of 13KB data size.
     - and then the file is always read sequentially and consequitively from start till required
-    	- Each request reads a image based on the distribution of request, most reads are either 2KB and 6KB. **(Chunking)**
+    	- Each request reads a image based on the distribution of request, most reads are either 2KB and 6KB. (Chunking)
     	- As the reads are small, the I/O bandwidth per operation is only 9MB/s
     - No data shuffling during reading.
     - Every rank seems to be reading the same offsets from the training dataset.
@@ -340,5 +340,5 @@
 	- \# of epochs in each step.
 	- checkpoint frequency in count of steps
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTA4MTc5NjkyMV19
+eyJoaXN0b3J5IjpbMTczNTkyNjU4NSwxMDgxNzk2OTIxXX0=
 -->
