@@ -269,9 +269,6 @@
 - Test Configuration
 	- 1 Node test.
 
-### Darshan I/O Profiling Results
-- Didnt detect any I/O in the application.
-
 ### Suggestions
 - Instead of using CSV format, Use tf record format so that reading can be decoupled with data processing.
 
@@ -340,5 +337,6 @@
 	- \# of epochs in each step.
 	- checkpoint frequency in count of steps
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTg0NDA2MTk3MCwxMDgxNzk2OTIxXX0=
+eyJoaXN0b3J5IjpbNDM0NTI3NTQ5LDE4NDQwNjE5NzAsMTA4MT
+c5NjkyMV19
 -->
