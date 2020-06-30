@@ -1,4 +1,3 @@
-
 """
 System Includes
 """
@@ -48,6 +47,7 @@ Global Methods
  You should have received a copy of the GNU General Public License along with this program.
  If not, see <http://www.gnu.org/licenses/>.
 """
+
 
 def _exec_cmd(command):
     """
@@ -346,7 +346,7 @@ class VaniDL(object):
             self._dxt_df['ext'] = self._dxt_df.Filename.apply(lambda x: x.split('.')[-1])
             self._dxt_df.loc[self._dxt_df['Filename'].str.contains("\.") == False, 'ext'] = ""
             self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains("py")]
-        
+
         self._df["Filename"] = self._df["Filename"].astype('category')
         self._df['ext'] = self._df.Filename.apply(lambda x: x.split('.')[-1])
         self._df.loc[self._df['Filename'].str.contains("\.") == False, 'ext'] = ""
@@ -454,7 +454,12 @@ class VaniDL(object):
             return dataset_map
         else:
             return None
+
     def _parse_tb_logs(self, tensorflow_logs_dir):
+        """
+        :param tensorflow_logs_dir, log directory for tensorboard logs.
+        :return JSON of IPA
+        """
         fileExt = "*input_pipeline.pb"
         input_pipeline_files = list(pathlib.Path(tensorflow_logs_dir).rglob(fileExt))
         ipa_hosts = {}
@@ -514,7 +519,8 @@ class VaniDL(object):
     Public Functions
     """
 
-    def Load(self, darshan_file, preprocessed_dir="/tmp/temp_analysis", data_paths_include=[], tensorflow_logs_dir=None):
+    def Load(self, darshan_file, preprocessed_dir="/tmp/temp_analysis", data_paths_include=[],
+             tensorflow_logs_dir=None):
         """
         This functions bootstraps the VaniDLr with the given darshan filename
 
@@ -522,7 +528,8 @@ class VaniDL(object):
         ----------
         :param darshan_file: Darshan's DXT trace file.
         :param preprocessed_dir: full path where post processing checkpoints can be made for faster loading.
-        :param data_paths_include: paths to include for I/O Analysis
+        :param data_paths_include: paths to include for I/O Analysis.
+        :param tensorflow_logs_dir: directory where tensorflow logs are present.
         :return: Exception with Error code 1000, if darshan file is not passed.
                  Exception with Error code 1002, if darshan file is invalid.
                  Exception with Error code 1003, if environment variable DARSHAN_BIN_DIR is not set correctly.
@@ -593,6 +600,14 @@ class VaniDL(object):
         self._throw_if_not_loaded()
         return self._df
 
+    def GetTFInputPipeline(self):
+        """
+        Get the processed IPA information as a JSON object.
+        :return: JSON object with IPA information.
+        """
+        self._throw_if_not_loaded()
+        return self._tb_input_pipeline
+
     def GetJobTime(self):
         """
         Get the total time spent in the job.
@@ -645,7 +660,7 @@ class VaniDL(object):
             temp_df = temp_df[temp_df['Filename'].eq(filepath)]
         if rank is not None:
             temp_df = temp_df[temp_df['Rank'].eq(rank)]
-        return temp_df['io_time'].sum()/temp_df['Rank'].nunique()
+        return temp_df['io_time'].sum() / temp_df['Rank'].nunique()
 
     def GetIOSize(self, filepath=None, rank=None):
         """
@@ -808,12 +823,14 @@ class VaniDL(object):
                 count_series[n] += 1
                 sum_series[n] += float(row['Length'])
         df_time = pd.DataFrame(
-            {'time_step': data_points_series, 'operation_count': count_series, 'io_bytes': sum_series, 'read_bytes':read_bytes_series, 'read_count':read_series, 'write_bytes':write_bytes_series, 'write_count':write_series})
+            {'time_step': data_points_series, 'operation_count': count_series, 'io_bytes': sum_series,
+             'read_bytes': read_bytes_series, 'read_count': read_series, 'write_bytes': write_bytes_series,
+             'write_count': write_series})
         if save:
             df_time.to_csv(index=False, path_or_buf=tm_df_filename)
         return df_time
 
-    def GetIORequestDistribution(self, filepath=None, rank=None, operation=None , bins=100, threshold=AUTO):
+    def GetIORequestDistribution(self, filepath=None, rank=None, operation=None, bins=100, threshold=AUTO):
         """
         Returns a 2d series of value counts for given bins of io sizes.
         if filepath is passed, data is filtered by filename
@@ -1124,7 +1141,7 @@ class VaniDL(object):
             "special": special_summary
         }
 
-    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json",save = True):
+    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json", save=True):
         """
         This functions build a timeline from the darshan traces to be analyzed using chrome://tracing
         It puts the darshan dxt trace on thread id 0 and put the darshan normal trace on thread id 1.
@@ -1149,7 +1166,7 @@ class VaniDL(object):
         }
         timestamps = []
         data = []
-        #'Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End'
+        # 'Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End'
         pb_total = self._dxt_df.count()['Module'];
         i = 1
         ranks_set = set()
@@ -1158,36 +1175,37 @@ class VaniDL(object):
                 progress(i, pb_total, status='Creating DXT Timeline')
             i += 1
             ranks_set.add(int(row['Rank']))
-            event_start =   {"name": row['Filename'], "cat": row['Module'], "ph": "B", "ts": int(float(row['Start'])*1e6), "pid": int(row['Rank']), "tid": 0,
-                                "args": {
-                                    "Module":row['Module'],
-                                    "Filename": row['Filename'],
-                                    "Rank": row['Rank'],
-                                    "Operation": row['Operation'],
-                                    "Segment": row['Segment'],
-                                    "Offset": row['Offset'],
-                                    "Length": row['Length'],
-                                    "Start": row['Start'],
-                                    "End": row['End']
-                                }
-                            }
-            event_end =     {"ph": "E", "ts": int(float(row['End'])*1e6), "pid": int(row['Rank']), "tid": 0,
-                                "args": {
-                                    "Module":row['Module'],
-                                    "Filename": row['Filename'],
-                                    "Rank": row['Rank'],
-                                    "Operation": row['Operation'],
-                                    "Segment": row['Segment'],
-                                    "Offset": row['Offset'],
-                                    "Length": row['Length'],
-                                    "Start": row['Start'],
-                                    "End": row['End']
-                                }
-                            }
+            event_start = {"name": row['Filename'], "cat": row['Module'], "ph": "B",
+                           "ts": int(float(row['Start']) * 1e6), "pid": int(row['Rank']), "tid": 0,
+                           "args": {
+                               "Module": row['Module'],
+                               "Filename": row['Filename'],
+                               "Rank": row['Rank'],
+                               "Operation": row['Operation'],
+                               "Segment": row['Segment'],
+                               "Offset": row['Offset'],
+                               "Length": row['Length'],
+                               "Start": row['Start'],
+                               "End": row['End']
+                           }
+                           }
+            event_end = {"ph": "E", "ts": int(float(row['End']) * 1e6), "pid": int(row['Rank']), "tid": 0,
+                         "args": {
+                             "Module": row['Module'],
+                             "Filename": row['Filename'],
+                             "Rank": row['Rank'],
+                             "Operation": row['Operation'],
+                             "Segment": row['Segment'],
+                             "Offset": row['Offset'],
+                             "Length": row['Length'],
+                             "Start": row['Start'],
+                             "End": row['End']
+                         }
+                         }
 
-            timestamps.append(int(float(row['Start'])*1e6))
+            timestamps.append(int(float(row['Start']) * 1e6))
             data.append(event_start)
-            timestamps.append(int(float(row['End'])*1e6))
+            timestamps.append(int(float(row['End']) * 1e6))
             data.append(event_end)
         pb_total = self._df.count()['Module'];
         i = 1
@@ -1269,11 +1287,12 @@ class VaniDL(object):
         if save:
             json_str = json.dumps(chromeTimeline) + "\n"
             json_bytes = json_str.encode('utf-8')
-            with gzip.GzipFile("{}/{}.gz".format(location,filename), 'w') as fout:  # 4. gzip
+            with gzip.GzipFile("{}/{}.gz".format(location, filename), 'w') as fout:  # 4. gzip
                 fout.write(json_bytes)
         return chromeTimeline
 
-    def CreateMergedTimeline(self, tensorboard_dir, merged_timeline_output_dir, merged_timeline_file_prefix, save=True):
+    def CreateMergedTimeline(self, tensorboard_dir, merged_timeline_output_dir, merged_timeline_file_prefix,
+                             save=True, split_by_ranks=False, split_by_time=False, time_slice=None):
         """
         This method merges all tracing files from tensorboard_dir with the darshan traces.
         It first converts hostnames and process id to ranks. (Assumption: hostname and pids are ordered by MPI
@@ -1282,6 +1301,9 @@ class VaniDL(object):
         :param merged_timeline_output_dir: directory where merged timeline should be output.
         :param merged_timeline_file_prefix: prefix for out files to be written.
         :param save: if the timeline should be saved
+        :param split_by_ranks: should the timeline be split by ranks.
+        :param split_by_time: should the timeline be split by time.
+        :param time_slice: if timeline is split by time then what is the timeslice.
         :return: the generated timeline which is merged between darshan and td logs files.
         """
         if tensorboard_dir == None or merged_timeline_file_prefix == None or merged_timeline_output_dir == None:
@@ -1321,14 +1343,15 @@ class VaniDL(object):
         base_json = self.CreateChromeTimeline(save=False)
         b_base_json = base_json
         print("merging")
-        trace_data_proc = [None] * 8
+        merged_events = []
+        max_ts = 0
         trace_events = list(b_base_json["traceEvents"])
         for trace_event in trace_events:
             if 'pid' in trace_event:
                 pid = trace_event['pid']
-                if trace_data_proc[pid] == None:
-                    trace_data_proc[pid] = []
-                trace_data_proc[pid].append(trace_event)
+                merged_events.append(trace_event)
+                if max_ts < trace_event["ts"]:
+                    max_ts = trace_event["ts"]
         pb_total = len(files);
         i = 1
         for file in files:
@@ -1344,21 +1367,9 @@ class VaniDL(object):
                 if 'pid' in trace_event:
                     trace_event['pid'] = hosts[hostname][trace_event['pid']]['rank']
                     pid = trace_event['pid']
-                    if trace_data_proc[pid] == None:
-                        trace_data_proc[pid] = []
-                    trace_data_proc[pid].append(trace_event)
-        merged_events = []
-        for i, trace_data in enumerate(trace_data_proc):
-            merged_events.extend(list(trace_data))
-            b_base_json = base_json
-            b_base_json["traceEvents"] = trace_data
-            json_file = "{}/{}_r{}.json.gz".format(merged_timeline_output_dir, merged_timeline_file_prefix, i)
-            json_str = json.dumps(b_base_json) + "\n"
-            json_bytes = json_str.encode('utf-8')
-            if save:
-                with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
-                    fout.write(json_bytes)
-                print("written {}".format(json_file))
+                    merged_events.append(trace_event)
+                    if max_ts < trace_event["ts"]:
+                        max_ts = trace_event["ts"]
         merged_timeline_json = base_json
         merged_timeline_json["traceEvents"] = merged_events
         json_file = "{}/{}_complete.json.gz".format(merged_timeline_output_dir, merged_timeline_file_prefix)
@@ -1368,6 +1379,52 @@ class VaniDL(object):
             with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
                 fout.write(json_bytes)
             print("written {}".format(json_file))
+        if split_by_ranks:
+            trace_data_proc = [None] * 8
+            pb_total = len(merged_events)
+            i = 1
+            for merged_event in merged_events:
+                progress(i, pb_total, status='Spliiting timeline by rank')
+                i += 1
+                if 'pid' in merged_event:
+                    pid = merged_event['pid']
+                    if trace_data_proc[pid] is None:
+                        trace_data_proc[pid] = []
+                    trace_data_proc[pid].append(merged_event)
+            for i, trace_data in enumerate(trace_data_proc):
+                b_base_json = base_json
+                b_base_json["traceEvents"] = trace_data
+                json_file = "{}/{}_r{}.json.gz".format(merged_timeline_output_dir, merged_timeline_file_prefix, i)
+                json_str = json.dumps(b_base_json) + "\n"
+                json_bytes = json_str.encode('utf-8')
+                if save:
+                    with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
+                        fout.write(json_bytes)
+                    print("written {}".format(json_file))
+        elif split_by_time:
+            if time_slice is None:
+                time_slice=100*1e6
+            num_pieces = math.ceil(max_ts/time_slice)
+            trace_data_time = [None]*num_pieces
+            pb_total = len(merged_events);
+            i = 1
+            for merged_event in merged_events:
+                progress(i, pb_total, status='Spliiting timeline by time')
+                i += 1
+                time_piece = merged_event["ts"]/time_slice
+                if trace_data_time[time_piece] is None:
+                    trace_data_time[time_piece]=[]
+                trace_data_time[time_piece].append(merged_event)
+            for i, trace_data in enumerate(trace_data_time):
+                b_base_json = base_json
+                b_base_json["traceEvents"] = trace_data
+                json_file = "{}/{}_t{}.json.gz".format(merged_timeline_output_dir, merged_timeline_file_prefix, i)
+                json_str = json.dumps(b_base_json) + "\n"
+                json_bytes = json_str.encode('utf-8')
+                if save:
+                    with gzip.GzipFile(json_file, 'w') as fout:  # 4. gzip
+                        fout.write(json_bytes)
+                    print("written {}".format(json_file))
         return merged_timeline_json
 
     def MergeTimelines(self, timeline_file1, timeline_file2, merged_timeline_file):
@@ -1390,9 +1447,7 @@ class VaniDL(object):
             file_2_json = json.load(f)
         new_trace_values = file_1_json["traceEvents"]
         new_trace_values.extend(file_2_json["traceEvents"])
-        file_1_json["traceEvents"]=new_trace_values
+        file_1_json["traceEvents"] = new_trace_values
         with open(merged_timeline_file, 'w') as outfile:
             json.dump(file_1_json, outfile)
         return file_1_json
-
-
