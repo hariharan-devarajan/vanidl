@@ -29,8 +29,8 @@ from src.vanidl import VaniDL
 from src.constants import *
 import tensorflow as tf
 
-DARSHAN_DIR_PATH = "/home/hariharan/install"
-VANIDL_DIR_PATH = "/home/hariharan/PycharmProjects/vanidl"
+DARSHAN_DIR_PATH = "/home/hdevarajan/software/install"
+VANIDL_DIR_PATH = "/home/hdevarajan/PycharmProjects/vanidl"
 
 ORIGINAL_DATASET_DIR = "/projects/datascience/dhari/datasets/cosmic_tagger"
 TARGET_DATASET_DIR = "{}/tests".format(VANIDL_DIR_PATH)
@@ -40,6 +40,7 @@ RANK = 0
 TIMESTEP_SEC = 1
 PROCESSED_DIR = "{}/tests/temp_analysis".format(VANIDL_DIR_PATH)
 DARSHAN_FILE = "{}/tests/test.darshan".format(VANIDL_DIR_PATH)
+TB_LOG_DIR = "{}/tests/tb_logs".format(VANIDL_DIR_PATH)
 
 
 def LoadEnv():
@@ -284,7 +285,42 @@ class MyTestCase(unittest.TestCase):
     def test_MergeTimelines(self):
         LoadEnv()
         profile = VaniDL()
-        merged_trace = profile.MergeTimelines(timeline_file1="./compute_trace.json",timeline_file2="./io_timeline.json", merged_timeline_file="./merged_trace.json")
+        merged_trace = profile.MergeTimelines(timeline_file1="./compute_trace.json",timeline_file2="./io_timeline.json",
+                                              merged_timeline_file="./merged_trace.json")
+        self.assertNotEqual(len(merged_trace), 0)
+
+    def test_CreateMergedTimeline(self):
+        LoadEnv()
+        profile = VaniDL()
+        status = profile.Load(DARSHAN_FILE, data_paths_include=DATAPATH_INCLUDES, preprocessed_dir=PROCESSED_DIR)
+        profile = rectify_paths(profile)
+        merged_trace = profile.CreateMergedTimeline(tensorboard_dir=TB_LOG_DIR, merged_timeline_output_dir=PROCESSED_DIR,
+                                                    merged_timeline_file_prefix="tb_log",
+                                                    save=True, split_by_ranks=False, split_by_time=False,
+                                                    time_slice=None)
+        self.assertNotEqual(len(merged_trace), 0)
+
+
+    def test_CreateMergedTimelineByRank(self):
+        LoadEnv()
+        profile = VaniDL()
+        status = profile.Load(DARSHAN_FILE, data_paths_include=DATAPATH_INCLUDES, preprocessed_dir=PROCESSED_DIR)
+        profile = rectify_paths(profile)
+        merged_trace = profile.CreateMergedTimeline(tensorboard_dir=TB_LOG_DIR, merged_timeline_output_dir=PROCESSED_DIR,
+                                                    merged_timeline_file_prefix="tb_log",
+                                                    save=True, split_by_ranks=True, split_by_time=False,
+                                                    time_slice=None)
+        self.assertNotEqual(len(merged_trace), 0)
+
+    def test_CreateMergedTimelineByTime(self):
+        LoadEnv()
+        profile = VaniDL()
+        status = profile.Load(DARSHAN_FILE, data_paths_include=DATAPATH_INCLUDES, preprocessed_dir=PROCESSED_DIR)
+        profile = rectify_paths(profile)
+        merged_trace = profile.CreateMergedTimeline(tensorboard_dir=TB_LOG_DIR, merged_timeline_output_dir=PROCESSED_DIR,
+                                                    merged_timeline_file_prefix="tb_log",
+                                                    save=True, split_by_ranks=False, split_by_time=True,
+                                                    time_slice=100*1e6)
         self.assertNotEqual(len(merged_trace), 0)
 
 if __name__ == '__main__':

@@ -1308,7 +1308,7 @@ class VaniDL(object):
         """
         if tensorboard_dir == None or merged_timeline_file_prefix == None or merged_timeline_output_dir == None:
             raise Exception(str(ErrorCodes.EC1011))
-        if not os.path.exists(tensorboard_dir) or not os.path.exists(merged_timeline_output_dir):
+        if not (os.path.exists(tensorboard_dir) and os.path.exists(merged_timeline_output_dir)):
             raise Exception(str(ErrorCodes.EC10112))
         fileExt = "*.trace.json.gz"
         posix_path_files = list(pathlib.Path(tensorboard_dir).rglob(fileExt))
@@ -1364,7 +1364,7 @@ class VaniDL(object):
             hostname = filename.split(".")[0]
             final_traces = []
             for trace_event in trace_events:
-                if 'pid' in trace_event:
+                if 'pid' in trace_event and "ts" in trace_event :
                     trace_event['pid'] = hosts[hostname][trace_event['pid']]['rank']
                     pid = trace_event['pid']
                     merged_events.append(trace_event)
@@ -1411,7 +1411,9 @@ class VaniDL(object):
             for merged_event in merged_events:
                 progress(i, pb_total, status='Spliiting timeline by time')
                 i += 1
-                time_piece = merged_event["ts"]/time_slice
+                time_piece = int(merged_event["ts"]/time_slice)
+                while time_piece > len(trace_data_time):
+                    trace_data_time.append(None)
                 if trace_data_time[time_piece] is None:
                     trace_data_time[time_piece]=[]
                 trace_data_time[time_piece].append(merged_event)
