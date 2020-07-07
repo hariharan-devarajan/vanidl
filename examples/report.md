@@ -333,13 +333,14 @@
 	- Dimension of image/ length of record (unit of I/O)
 - Access Characteristics
 	- Shuffle during reading
-	- Batch of Reading (sequential predetermined batch)
+	- batch size of Reading (sequential predetermined batch)
 - Processing Characteristics
+	- # samples
 	- \# of epochs (2-3)
-	- \# of Steps in each epoch.
+	- \# of Steps in each epoch. (dependents on = # samples/batch size)
 	- checkpoint frequency in count of steps
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNTYzOTIxNTA4LC0xMDAzNzg3NTg4LC0xMz
+eyJoaXN0b3J5IjpbLTY2MTQzOTkzLC0xMDAzNzg3NTg4LC0xMz
 UwNzMyMTY5LDQzNDUyNzU0OSwxODQ0MDYxOTcwLDEwODE3OTY5
 MjFdfQ==
 -->
