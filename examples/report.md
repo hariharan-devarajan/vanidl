@@ -335,11 +335,11 @@
 	- Shuffle during reading
 	- Batch of Reading (sequential predetermined batch)
 - Processing Characteristics
-	- \# of epochs 
+	- \# of epochs (2-3)
 	- \# of Steps in each epoch.
 	- checkpoint frequency in count of steps
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyMjIyOTIzMSwtMTAwMzc4NzU4OCwtMT
-M1MDczMjE2OSw0MzQ1Mjc1NDksMTg0NDA2MTk3MCwxMDgxNzk2
-OTIxXX0=
+eyJoaXN0b3J5IjpbNTYzOTIxNTA4LC0xMDAzNzg3NTg4LC0xMz
+UwNzMyMTY5LDQzNDUyNzU0OSwxODQ0MDYxOTcwLDEwODE3OTY5
+MjFdfQ==
 -->
