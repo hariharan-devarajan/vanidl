@@ -290,13 +290,15 @@
 - The Fusion Recurrent Neural Net (FRNN) software is a Python package that implements deep learning models for disruption prediction in tokamak fusion plasmas.
 - It preprocesses signal and normalization files for stateful LSTM training.
 - Uses numpy files npz formats to read data.
+	- each signal file is 2MB in size.
+	- normalized signal file is 1MB in size.
 
 ### Darshan I/O Profiling Results
 - It spends 8.43% of time on I/O
 - At each timestep it reads different different NPZ files which is read in one go and is fed to training steps
 - It performs 80% of I/O as small I/O of several KB and rest of the I/O is in MB.
 	- Most of time is dominated by the small I/O
-	- each signal file 
+	- 
 
 # I/O Patterns in Training of DL workloads
 
@@ -345,7 +347,7 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTkxOTMxNzQ1OSwtMTI5NjgwNDQxOSwtNj
+eyJoaXN0b3J5IjpbMjAyNDE3ODU3OSwtMTI5NjgwNDQxOSwtNj
 YxNDM5OTMsLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksNDM0NTI3
 NTQ5LDE4NDQwNjE5NzAsMTA4MTc5NjkyMV19
 -->
