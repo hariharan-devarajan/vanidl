@@ -294,7 +294,9 @@
 ### Darshan I/O Profiling Results
 - It spends 8.43% of time on I/O
 - At each timestep it reads different different NPZ files which is read in one go and is fed to training steps
-- It performs 
+- It performs 80% of I/O as small I/O of several KB and rest of the I/O is in MB.
+	- Most of time is dominated by the small I/O
+	- 
 
 # I/O Patterns in Training of DL workloads
 
@@ -343,7 +345,7 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE3ODQ2NzQ2NywtMTI5NjgwNDQxOSwtNj
-YxNDM5OTMsLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksNDM0NTI3
-NTQ5LDE4NDQwNjE5NzAsMTA4MTc5NjkyMV19
+eyJoaXN0b3J5IjpbLTExMTkwMDk3NDQsLTEyOTY4MDQ0MTksLT
+Y2MTQzOTkzLC0xMDAzNzg3NTg4LC0xMzUwNzMyMTY5LDQzNDUy
+NzU0OSwxODQ0MDYxOTcwLDEwODE3OTY5MjFdfQ==
 -->
