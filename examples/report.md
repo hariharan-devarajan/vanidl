@@ -284,7 +284,14 @@
 	- Uses 1 node configuration
 
 ### Darshan I/O Profiling Results
-- Didnt detect any I/O in the application.
+- It spend less than 1% of total time of total time on I/O 
+    - All I/O performed  is on a training csv file is predominantly **read** for reading images from the train dataset.
+    - The hdf5 file is read by 
+    - All data is read in the beginning and then training happens in memory
+    	- Each request reads a record which is approx ~256 KB
+    	- As the I/O is big enough it achieves a bandwidth of 400 MB/s
+    - Every rank seems to be reading the same offsets from the training dataset.
+    - It strong scales the data with the number of processes.
 
 ## 10. FRNN
 - The Fusion Recurrent Neural Net (FRNN) software is a Python package that implements deep learning models for disruption prediction in tokamak fusion plasmas.
@@ -351,8 +358,8 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTkzMDgwNDYyLC00MzU2OTk3NzIsLTk0Mj
-gyNjQ1NSwtMTI5NjgwNDQxOSwtNjYxNDM5OTMsLTEwMDM3ODc1
-ODgsLTEzNTA3MzIxNjksNDM0NTI3NTQ5LDE4NDQwNjE5NzAsMT
-A4MTc5NjkyMV19
+eyJoaXN0b3J5IjpbLTE5NTU0MTIwNDgsLTkzMDgwNDYyLC00Mz
+U2OTk3NzIsLTk0MjgyNjQ1NSwtMTI5NjgwNDQxOSwtNjYxNDM5
+OTMsLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksNDM0NTI3NTQ5LD
+E4NDQwNjE5NzAsMTA4MTc5NjkyMV19
 -->
