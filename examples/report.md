@@ -292,8 +292,8 @@
 - Uses numpy files npz formats to read data.
 
 ### Darshan I/O Profiling Results
-- Didnt detect any I/O in the application.
-
+- It spends 8.43% of time on I/O
+- At each timestep it reads different different NPZ files which is read in 
 
 # I/O Patterns in Training of DL workloads
 
@@ -342,7 +342,7 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyOTY4MDQ0MTksLTY2MTQzOTkzLC0xMD
-AzNzg3NTg4LC0xMzUwNzMyMTY5LDQzNDUyNzU0OSwxODQ0MDYx
-OTcwLDEwODE3OTY5MjFdfQ==
+eyJoaXN0b3J5IjpbMTQxMzYxMzQwMSwtMTI5NjgwNDQxOSwtNj
+YxNDM5OTMsLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksNDM0NTI3
+NTQ5LDE4NDQwNjE5NzAsMTA4MTc5NjkyMV19
 -->
