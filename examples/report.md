@@ -301,8 +301,7 @@
 	- Most of time is dominated by the small I/O
 	- As the I/O is not big enough it achieves a small median bandwidth.
 - There is an imbalance of I/O between ranks (20% variance) 
-- 
-	- 
+- Each rank reads different signal group files.
 
 # I/O Patterns in Training of DL workloads
 
@@ -351,7 +350,7 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTgyMTExNTY3LC0xMjk2ODA0NDE5LC02Nj
-E0Mzk5MywtMTAwMzc4NzU4OCwtMTM1MDczMjE2OSw0MzQ1Mjc1
-NDksMTg0NDA2MTk3MCwxMDgxNzk2OTIxXX0=
+eyJoaXN0b3J5IjpbLTk0MjgyNjQ1NSwtMTI5NjgwNDQxOSwtNj
+YxNDM5OTMsLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksNDM0NTI3
+NTQ5LDE4NDQwNjE5NzAsMTA4MTc5NjkyMV19
 -->
