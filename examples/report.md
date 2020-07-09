@@ -291,6 +291,7 @@
 - It preprocesses signal and normalization files for stateful LSTM training.
 - Uses numpy files npz formats to read data.
 	- each signal file is 2MB in size (total 28545 files).
+		- Each has a 1000s samples
 	- normalized signal file is 1MB in size (1 file).
 
 ### Darshan I/O Profiling Results
@@ -350,8 +351,8 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTQzNTY5OTc3MiwtOTQyODI2NDU1LC0xMj
-k2ODA0NDE5LC02NjE0Mzk5MywtMTAwMzc4NzU4OCwtMTM1MDcz
-MjE2OSw0MzQ1Mjc1NDksMTg0NDA2MTk3MCwxMDgxNzk2OTIxXX
-0=
+eyJoaXN0b3J5IjpbLTkzMDgwNDYyLC00MzU2OTk3NzIsLTk0Mj
+gyNjQ1NSwtMTI5NjgwNDQxOSwtNjYxNDM5OTMsLTEwMDM3ODc1
+ODgsLTEzNTA3MzIxNjksNDM0NTI3NTQ5LDE4NDQwNjE5NzAsMT
+A4MTc5NjkyMV19
 -->
