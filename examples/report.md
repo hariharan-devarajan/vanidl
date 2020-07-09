@@ -285,7 +285,7 @@
 
 ### Darshan I/O Profiling Results
 - It spend less than 1% of total time of total time on I/O 
-    - All I/O performed  is on a training csv file is predominantly **read** for reading images from the train dataset.
+    - All I/O performed  is on a training hdf5 file is predominantly **read** for reading images from the train dataset.
     - The hdf5 file is read by the rank and it reads the whole dataset is read initially and used within training in memory
     	- Each request reads a record which is approx ~64KB
 
@@ -354,8 +354,8 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyMDUyOTAxLC05MzA4MDQ2MiwtNDM1Nj
-k5NzcyLC05NDI4MjY0NTUsLTEyOTY4MDQ0MTksLTY2MTQzOTkz
-LC0xMDAzNzg3NTg4LC0xMzUwNzMyMTY5LDQzNDUyNzU0OSwxOD
-Q0MDYxOTcwLDEwODE3OTY5MjFdfQ==
+eyJoaXN0b3J5IjpbOTI2MDAxMDE4LC0xMjA1MjkwMSwtOTMwOD
+A0NjIsLTQzNTY5OTc3MiwtOTQyODI2NDU1LC0xMjk2ODA0NDE5
+LC02NjE0Mzk5MywtMTAwMzc4NzU4OCwtMTM1MDczMjE2OSw0Mz
+Q1Mjc1NDksMTg0NDA2MTk3MCwxMDgxNzk2OTIxXX0=
 -->
