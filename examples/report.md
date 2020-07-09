@@ -299,7 +299,7 @@
 - At each timestep it reads different different NPZ files which is read in one go and is fed to training steps
 - It performs 80% of I/O as small I/O of several KB and rest of the I/O is in MB.
 	- Most of time is dominated by the small I/O
-	- As the I/O is not big enough it achieves a small median bandwidth.
+	- As the I/O is not big enough it achieves a small median bandwidth. But the small fi
 - There is an imbalance of I/O between ranks (20% variance) 
 - Each rank reads different signal group files.
 
@@ -350,7 +350,8 @@
 	- Benchmark Skeleton
 	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTk0MjgyNjQ1NSwtMTI5NjgwNDQxOSwtNj
-YxNDM5OTMsLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksNDM0NTI3
-NTQ5LDE4NDQwNjE5NzAsMTA4MTc5NjkyMV19
+eyJoaXN0b3J5IjpbMTg2NjE3Mzc3MywtOTQyODI2NDU1LC0xMj
+k2ODA0NDE5LC02NjE0Mzk5MywtMTAwMzc4NzU4OCwtMTM1MDcz
+MjE2OSw0MzQ1Mjc1NDksMTg0NDA2MTk3MCwxMDgxNzk2OTIxXX
+0=
 -->
