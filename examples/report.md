@@ -284,16 +284,28 @@
 	- Uses 1 node configuration
 
 ### Darshan I/O Profiling Results
-- Didnt detect any I/O in the application.
+- It spend less than 1% of total time of total time on I/O 
+    - All I/O performed  is on a training hdf5 file is predominantly **read** for reading images from the train dataset.
+    - The hdf5 file is read by the rank and it reads the whole dataset is read initially and used within training in memory
+    	- Each request reads a record which is approx ~64KB
 
 ## 10. FRNN
 - The Fusion Recurrent Neural Net (FRNN) software is a Python package that implements deep learning models for disruption prediction in tokamak fusion plasmas.
 - It preprocesses signal and normalization files for stateful LSTM training.
 - Uses numpy files npz formats to read data.
+	- each signal file is 2MB in size (total 28545 files).
+		- Each has a 1000s samples
+	- normalized signal file is 1MB in size (1 file).
 
 ### Darshan I/O Profiling Results
-- Didnt detect any I/O in the application.
-
+- It spends 8.43% of time on I/O
+- The I/O pattern is not sequential or consecutive. (only 35% of I/O is sequential)
+- At each timestep it reads different different NPZ files which is read in one go and is fed to training steps
+- It performs 80% of I/O as small I/O of several KB and rest of the I/O is in MB.
+	- Most of time is dominated by the small I/O
+	- As the I/O is not big enough it achieves a small median bandwidth. But the small file normalization is only read in the start and hence average bandwidth is 400MB/s
+- There is an imbalance of I/O between ranks (20% variance) 
+- Each rank reads different signal group files.
 
 # I/O Patterns in Training of DL workloads
 
@@ -333,12 +345,16 @@
 	- Dimension of image/ length of record (unit of I/O)
 - Access Characteristics
 	- Shuffle during reading
-	- Batch of Reading (sequential predetermined batch)
+	- batch size of Reading (sequential predetermined batch)
 - Processing Characteristics
-	- \# of Steps
-	- \# of epochs in each step.
+	- # samples
+	- \# of epochs (2-3)
+	- \# of Steps in each epoch. (dependents on = # samples/batch size)
 	- checkpoint frequency in count of steps
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwMDM3ODc1ODgsLTEzNTA3MzIxNjksND
-M0NTI3NTQ5LDE4NDQwNjE5NzAsMTA4MTc5NjkyMV19
+eyJoaXN0b3J5IjpbLTExNjA3ODkxMTYsOTI2MDAxMDE4LC0xMj
+A1MjkwMSwtOTMwODA0NjIsLTQzNTY5OTc3MiwtOTQyODI2NDU1
+LC0xMjk2ODA0NDE5LC02NjE0Mzk5MywtMTAwMzc4NzU4OCwtMT
+M1MDczMjE2OSw0MzQ1Mjc1NDksMTg0NDA2MTk3MCwxMDgxNzk2
+OTIxXX0=
 -->
