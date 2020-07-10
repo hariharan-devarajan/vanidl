@@ -1386,7 +1386,8 @@ class VaniDL(object):
             pb_total = len(merged_events)
             i = 1
             for merged_event in merged_events:
-                progress(i, pb_total, status='Spliiting timeline by rank')
+                if i % 100 == 0 or i == pb_total:
+                    progress(i, pb_total, status='Splitting timeline by rank')
                 i += 1
                 if 'pid' in merged_event:
                     pid = merged_event['pid']
@@ -1411,7 +1412,8 @@ class VaniDL(object):
             pb_total = len(merged_events);
             i = 1
             for merged_event in merged_events:
-                progress(i, pb_total, status='Spliiting timeline by time')
+                if i % 100 == 0 or i == pb_total:
+                    progress(i, pb_total, status='Splitting timeline by time')
                 i += 1
                 time_piece = int(merged_event["ts"]/time_slice)
                 while time_piece > len(trace_data_time):
