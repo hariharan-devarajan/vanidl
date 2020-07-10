@@ -1141,7 +1141,7 @@ class VaniDL(object):
             "special": special_summary
         }
 
-    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json", save=True):
+    def CreateChromeTimeline(self, location="/tmp/temp_analysis", filename="timeline.json", save=True, timeshift=0):
         """
         This functions build a timeline from the darshan traces to be analyzed using chrome://tracing
         It puts the darshan dxt trace on thread id 0 and put the darshan normal trace on thread id 1.
@@ -1149,6 +1149,7 @@ class VaniDL(object):
         :param location: folder where timeline should be stored
         :param filename: filename of the timeline
         :param save: if the timeline returned should be persisted
+        :param timeshift: how much time darshan trace should be shifted for alignment. (negetive value would move the timeline backwards)
         :return: the timeline returned in json format.
         """
         self._throw_if_not_loaded()
@@ -1176,7 +1177,7 @@ class VaniDL(object):
             i += 1
             ranks_set.add(int(row['Rank']))
             event_start = {"name": row['Filename'], "cat": row['Module'], "ph": "B",
-                           "ts": int(float(row['Start']) * 1e6), "pid": int(row['Rank']), "tid": 0,
+                           "ts": int((float(row['Start']) + float(timeshift)) * 1e6), "pid": int(row['Rank']), "tid": 0,
                            "args": {
                                "Module": row['Module'],
                                "Filename": row['Filename'],
@@ -1189,7 +1190,7 @@ class VaniDL(object):
                                "End": row['End']
                            }
                            }
-            event_end = {"ph": "E", "ts": int(float(row['End']) * 1e6), "pid": int(row['Rank']), "tid": 0,
+            event_end = {"ph": "E", "ts": int((float(row['End']) + float(timeshift)) * 1e6), "pid": int(row['Rank']), "tid": 0,
                          "args": {
                              "Module": row['Module'],
                              "Filename": row['Filename'],
@@ -1256,31 +1257,31 @@ class VaniDL(object):
                 for rank in ranks:
                     if row['STDIO_BYTES_READ'] != 0:
                         event_start = {"name": row['Filename'], "cat": row['Module'], "ph": "B",
-                                       "ts": int(float(row['STDIO_F_READ_START_TIMESTAMP']) * 1e6),
+                                       "ts": int((float(row['STDIO_F_READ_START_TIMESTAMP']) + float(timeshift)) * 1e6),
                                        "pid": rank, "tid": 1,
                                        "args": args_val
                                        }
-                        event_end = {"ph": "E", "ts": int(float(row['STDIO_F_READ_END_TIMESTAMP']) * 1e6),
+                        event_end = {"ph": "E", "ts": int((float(row['STDIO_F_READ_END_TIMESTAMP']) + float(timeshift)) * 1e6),
                                      "pid": rank, "tid": 1,
                                      "args": args_val
                                      }
-                        timestamps.append(int(float(row['STDIO_F_READ_START_TIMESTAMP']) * 1e6))
+                        timestamps.append(int((float(row['STDIO_F_READ_START_TIMESTAMP']) + float(timeshift)) * 1e6))
                         data.append(event_start)
-                        timestamps.append(int(float(row['STDIO_F_READ_END_TIMESTAMP']) * 1e6))
+                        timestamps.append(int((float(row['STDIO_F_READ_END_TIMESTAMP']) + float(timeshift)) * 1e6))
                         data.append(event_end)
                     if row['STDIO_BYTES_WRITTEN'] != 0:
                         event_start = {"name": "darshan", "cat": row['Module'], "ph": "B",
-                                       "ts": int(float(row['STDIO_F_WRITE_START_TIMESTAMP']) * 1e6),
+                                       "ts": int((float(row['STDIO_F_WRITE_START_TIMESTAMP']) + float(timeshift)) * 1e6),
                                        "pid": rank, "tid": 1,
                                        "args": args_val
                                        }
-                        event_end = {"ph": "E", "ts": int(float(row['STDIO_F_WRITE_END_TIMESTAMP']) * 1e6),
+                        event_end = {"ph": "E", "ts": int((float(row['STDIO_F_WRITE_END_TIMESTAMP']) + float(timeshift)) * 1e6),
                                      "pid": rank, "tid": 1,
                                      "args": args_val
                                      }
-                        timestamps.append(int(float(row['STDIO_F_WRITE_START_TIMESTAMP']) * 1e6))
+                        timestamps.append(int((float(row['STDIO_F_WRITE_START_TIMESTAMP']) + float(timeshift)) * 1e6))
                         data.append(event_start)
-                        timestamps.append(int(float(row['STDIO_F_WRITE_END_TIMESTAMP']) * 1e6))
+                        timestamps.append(int((float(row['STDIO_F_WRITE_END_TIMESTAMP']) + float(timeshift)) * 1e6))
                         data.append(event_end)
         data.sort(key=lambda x: x['ts'])
         chromeTimeline["traceEvents"] = data
@@ -1292,7 +1293,7 @@ class VaniDL(object):
         return chromeTimeline
 
     def CreateMergedTimeline(self, tensorboard_dir, merged_timeline_output_dir, merged_timeline_file_prefix,
-                             save=True, split_by_ranks=False, split_by_time=False, time_slice=None):
+                             save=True, split_by_ranks=False, split_by_time=False, time_slice=None, timeshift=0):
         """
         This method merges all tracing files from tensorboard_dir with the darshan traces.
         It first converts hostnames and process id to ranks. (Assumption: hostname and pids are ordered by MPI
@@ -1304,6 +1305,7 @@ class VaniDL(object):
         :param split_by_ranks: should the timeline be split by ranks.
         :param split_by_time: should the timeline be split by time.
         :param time_slice: if timeline is split by time then what is the timeslice.
+        :param timeshift: shifts the darshan timeline.
         :return: the generated timeline which is merged between darshan and td logs files.
         """
         if tensorboard_dir == None or merged_timeline_file_prefix == None or merged_timeline_output_dir == None:
@@ -1340,7 +1342,7 @@ class VaniDL(object):
             for pid in sorted(hosts[hostname].keys()):
                 hosts[hostname][pid]['rank'] = rank
                 rank += 1
-        base_json = self.CreateChromeTimeline(save=False)
+        base_json = self.CreateChromeTimeline(save=False, timeshift=timeshift)
         b_base_json = base_json
         print("merging")
         merged_events = []
