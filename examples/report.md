@@ -351,11 +351,10 @@
 	- \# of epochs (2-3)
 	- \# of Steps in each epoch. (dependents on = # samples/batch size)
 	- checkpoint frequency in count of steps
-	- Benchmark Skeleton
-	- 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTI2MDAxMDE4LC0xMjA1MjkwMSwtOTMwOD
-A0NjIsLTQzNTY5OTc3MiwtOTQyODI2NDU1LC0xMjk2ODA0NDE5
-LC02NjE0Mzk5MywtMTAwMzc4NzU4OCwtMTM1MDczMjE2OSw0Mz
-Q1Mjc1NDksMTg0NDA2MTk3MCwxMDgxNzk2OTIxXX0=
+eyJoaXN0b3J5IjpbLTExNjA3ODkxMTYsOTI2MDAxMDE4LC0xMj
+A1MjkwMSwtOTMwODA0NjIsLTQzNTY5OTc3MiwtOTQyODI2NDU1
+LC0xMjk2ODA0NDE5LC02NjE0Mzk5MywtMTAwMzc4NzU4OCwtMT
+M1MDczMjE2OSw0MzQ1Mjc1NDksMTg0NDA2MTk3MCwxMDgxNzk2
+OTIxXX0=
 -->
