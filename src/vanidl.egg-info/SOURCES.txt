@@ -1,0 +1,15 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+src/vanidl/__init__.py
+src/vanidl/analyzer.py
+src/vanidl/configuraton.py
+src/vanidl/constants.py
+src/vanidl/error_code.py
+src/vanidl.egg-info/PKG-INFO
+src/vanidl.egg-info/SOURCES.txt
+src/vanidl.egg-info/dependency_links.txt
+src/vanidl.egg-info/requires.txt
+src/vanidl.egg-info/top_level.txt

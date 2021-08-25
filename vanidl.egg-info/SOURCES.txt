@@ -1,7 +1,0 @@
-README.md
-setup.cfg
-setup.py
-vanidl.egg-info/PKG-INFO
-vanidl.egg-info/SOURCES.txt
-vanidl.egg-info/dependency_links.txt
-vanidl.egg-info/top_level.txt

@@ -16,18 +16,12 @@ import gzip
 Pip Packages
 """
 import pandas as pd
-import h5py
-import tensorflow as tf
-# input_pipeline
-from tensorboard_plugin_profile.convert import input_pipeline_proto_to_gviz
-from tensorboard_plugin_profile.protobuf import input_pipeline_pb2
-
 """
 Local Includes
 """
-from src.error_code import ErrorCodes
-from src.constants import *
-from src.configuraton import *
+from vanidl.error_code import ErrorCodes
+from vanidl.constants import *
+from vanidl.configuraton import *
 
 """
 Global Methods
@@ -250,7 +244,7 @@ class VaniDL(object):
             ['Module', 'Filename', 'Rank', 'Operation', 'Segment', 'Offset', 'Length', 'Start', 'End']
         :return: a dataframe of DXT values.
         """
-        cmd = "{} {}".format(self._get_darshan_dxt_exe(), self._darshan_file)
+        cmd = "{} --show-incomplete {}".format(self._get_darshan_dxt_exe(), self._darshan_file)
         lines, stderr = _exec_cmd(cmd)
         io_lines = False
         pb_total = len(lines)
@@ -344,14 +338,12 @@ class VaniDL(object):
             self._dxt_df.loc[self._dxt_df['io_time'] == 0, 'io_time'] = 0.001
             self._dxt_df['bandwidth'] = self._dxt_df['Length'] / self._dxt_df['io_time']
             self._dxt_df['ext'] = self._dxt_df.Filename.apply(lambda x: x.split('.')[-1])
-            self._dxt_df.loc[self._dxt_df['Filename'].str.contains("\.") == False, 'ext'] = ""
-            self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains("py")]
+            self._dxt_df = self._dxt_df[~self._dxt_df['Filename'].str.contains(".py",regex=False)]
 
         self._df["Filename"] = self._df["Filename"].astype('category')
         self._df['ext'] = self._df.Filename.apply(lambda x: x.split('.')[-1])
-        self._df.loc[self._df['Filename'].str.contains("\.") == False, 'ext'] = ""
         # remove .py files
-        self._df = self._df[~self._df['Filename'].str.contains("py")]
+        self._df = self._df[~self._df['Filename'].str.contains(".py",regex=False)]
         self._df = self._df[~self._df['Filename'].str.contains("<STDERR>")]
         self._df = self._df[~self._df['Filename'].str.contains("<STDOUT>")]
         if len(data_paths_include) > 0:
@@ -409,9 +401,11 @@ class VaniDL(object):
         return pattern_file_map
 
     def _parse_tf_record(self, example_proto):
+        import tensorflow as tf
         return tf.io.parse_single_example(example_proto, self._tf_features)
 
     def _explore_hdf5(self, h5object, name):
+        import h5py
         """
         Explores the hdf5 file hierarchically and retrieves all dataset information
         Parameters
@@ -460,6 +454,8 @@ class VaniDL(object):
         :param tensorflow_logs_dir, log directory for tensorboard logs.
         :return JSON of IPA
         """
+        from tensorboard_plugin_profile.convert import input_pipeline_proto_to_gviz 
+        from tensorboard_plugin_profile.protobuf import input_pipeline_pb2
         fileExt = "*input_pipeline.pb"
         input_pipeline_files = list(pathlib.Path(tensorflow_logs_dir).rglob(fileExt))
         ipa_hosts = {}
@@ -1002,6 +998,7 @@ class VaniDL(object):
         -------
         map of summary of file
         """
+        import h5py
         self._throw_if_not_loaded()
         if filepath is None:
             raise Exception(str(ErrorCodes.EC1005))
@@ -1052,6 +1049,7 @@ class VaniDL(object):
         -------
         map of summary of TFRecord file
         """
+        import tensorflow as tf
         self._throw_if_not_loaded()
         if filepath is None:
             raise Exception(str(ErrorCodes.EC1005))
