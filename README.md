@@ -14,7 +14,9 @@ VaniDL is an tool for analyzing I/O patterns and behavior with Deep Learning App
 ## Overview
 ```python
 #Initialize class
-profile = DLProfile()
+import vanidl
+from vanidl.analyzer import *
+profile = VaniDL()
 #Load darshan file
 status = profile.Load("./run1.darshan")
 #Get Job Summary
